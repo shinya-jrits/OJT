@@ -2,50 +2,46 @@ import React from 'react';
 import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg';
 import './App.css';
 
-
-interface SquarePropsInterface {
-}
-
 interface SquareStateInterface {
-  file: File;
+  videoFile: File;
 }
 
-class MovieForm extends React.Component<SquarePropsInterface, SquareStateInterface> {
-  constructor(props: SquarePropsInterface) {
+class MovieForm extends React.Component<{}, SquareStateInterface> {
+  constructor(props: {}) {
     super(props);
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
-  private async convertVideoToAudio(file: File): Promise<File> {
+  private async convertVideoToAudio(videoFile: File): Promise<File> {
     const ffmpeg = createFFmpeg({
       log: true,
     });
     await ffmpeg.load();
-    const fetchedFile = await fetchFile(file);
-    ffmpeg.FS('stream', file.name, fetchedFile);
-    await ffmpeg.run('-i', file.name, 'audio.wav');
+    const fetchedFile = await fetchFile(videoFile);
+    ffmpeg.FS('writeFile', videoFile.name, fetchedFile);
+    await ffmpeg.run('-i', videoFile.name, 'audio.wav');
     return ffmpeg.FS('readFile', 'audio.wav');
-
   }
   private handleChange(event: React.ChangeEvent<HTMLInputElement>) {
     if (event.target.files != null) {
       Array.from(event.target.files).forEach(file => {
         this.setState({
-          file: file,
+          videoFile: file,
         });
       })
     }
   }
   handleSubmit = (event: React.FormEvent<HTMLFormElement>): void => {
 
-    const result = this.convertVideoToAudio(this.state.file);
+    const result = this.convertVideoToAudio(this.state.videoFile);
     result.then((result) => {
-      const data = window.URL.createObjectURL(new Blob([result]));
-      const url = document.createElement('a');
-      url.href = data;
-      url.setAttribute('download', 'audio.wav');
-      url.click();
+      const url = window.URL.createObjectURL(new Blob([result]));
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.setAttribute('download', 'audio.wav');
+      anchor.click();
+
     })
     event.preventDefault();//ページ遷移を防ぐため
   }
