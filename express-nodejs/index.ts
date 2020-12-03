@@ -18,13 +18,13 @@ router.get('/api/getTest', (req: express.Request, res: express.Response) => {
     console.log(req.query);
 });
 
-const upload = multer({ dest: './audioFile' });
+const upload = multer({ inMemory: true });
 const cpupload = upload.fields([{ name: 'upfile', maxCount: 1 }, { name: 'name', maxCount: 1 }]);
 router.post('/api/postTest', cpupload, (req: express.Request, res: express.Response) => {
     res.send(req.body);
-    console.log(req.body.mail);
+    //console.log(req.body.mail);
     //@ts-ignore
-    console.log(req.files['upfile']);
+    console.log(req.files['upfile'][0].buffer);
 });
 app.use(router);
 
