@@ -2,11 +2,11 @@ import React from 'react';
 import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg';
 import './App.css';
 
-interface SquareStateInterface {
+interface convertVideoToAudioStateInterface {
   videoFile: File;
 }
 
-class MovieForm extends React.Component<{}, SquareStateInterface> {
+class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
   constructor(props: {}) {
     super(props);
     this.handleChange = this.handleChange.bind(this);
@@ -35,6 +35,7 @@ class MovieForm extends React.Component<{}, SquareStateInterface> {
   handleSubmit = (event: React.FormEvent<HTMLFormElement>): void => {
 
     const result = this.convertVideoToAudio(this.state.videoFile);
+    //リリース前には削除予定
     result.then((result) => {
       const url = window.URL.createObjectURL(new Blob([result]));
       const anchor = document.createElement('a');
