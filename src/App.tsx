@@ -1,51 +1,62 @@
 import React from 'react';
-import ReactDom from 'react-dom';
 import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg';
 import './App.css';
 
-
-interface SquarePropsInterface {
-  //value: String;
+interface convertVideoToAudioStateInterface {
+  videoFile: File;
 }
 
-interface SquareStateInterface {
-  value: string;
-}
-
-class MovieForm extends React.Component<SquarePropsInterface, SquareStateInterface> {
-  constructor(props:SquarePropsInterface) {
+class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
+  constructor(props: {}) {
     super(props);
-    this.state = {value:''}
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
-  handleChange = (event:React.ChangeEvent<HTMLInputElement>):void => {
+
+  private async convertVideoToAudio(videoFile: File): Promise<File> {
     const ffmpeg = createFFmpeg({
       log: true,
     });
-    const fs = require('fs');
-    async () => {
-      await ffmpeg.load();
-      ffmpeg.FS('writeFile','video.mp4',await fetchFile(event.target.value));
-      await ffmpeg.run('-i', 'video.mp4', 'audio.wav');
-      const data = ffmpeg.FS('readFile', 'audio.wav');
-      await fs.promises.writeFile('./test.wav',data);
-      //音声変換したい
-    }
-      this.setState({value: event.target.value});
+    await ffmpeg.load();
+    const fetchedFile = await fetchFile(videoFile);
+    ffmpeg.FS('writeFile', videoFile.name, fetchedFile);
+    await ffmpeg.run('-i', videoFile.name, 'audio.wav');
+    return ffmpeg.FS('readFile', 'audio.wav');
   }
-  handleSubmit = (event:React.FormEvent<HTMLFormElement>):void => {
-    
+  private handleChange(event: React.ChangeEvent<HTMLInputElement>) {
+    if (event.target.files != null) {
+      Array.from(event.target.files).forEach(file => {
+        this.setState({
+          videoFile: file,
+        });
+      })
+    }
+  }
+  handleSubmit = (event: React.FormEvent<HTMLFormElement>): void => {
+
+    const result = this.convertVideoToAudio(this.state.videoFile);
+    //リリース前には削除予定
+    result.then((result) => {
+      const url = window.URL.createObjectURL(new Blob([result]));
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.setAttribute('download', 'audio.wav');
+      anchor.click();
+
+    })
+    event.preventDefault();//ページ遷移を防ぐため
   }
   render() {
     return (
-      <form onSubmit={this.handleSubmit}>
-        <label>
-          Name:
-          <input type="file" accept = "video/mp4" value={this.state.value} onChange={this.handleChange} />
-        </label>
-        <input type="submit" value="Submit" />
-      </form>
+      <div>
+        <form onSubmit={this.handleSubmit}>
+          <label>
+            Name:
+          <input type="file" accept="video/mp4" onChange={this.handleChange} />
+          </label>
+          <input type="submit" value="Submit" />
+        </form>
+      </div>
     );
   }
 }
