@@ -1,66 +1,39 @@
 import express from 'express'
 import { Storage } from '@google-cloud/storage'
 import multer from 'multer'
-import { Stream } from 'stream';
+import { v4 as uuidv4 } from 'uuid'
+import { finished } from 'stream';
 
 const app: express.Express = express();
 
-app.use((req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "origin, X-Requested-With, Content-Type, Accept");
-    next();
-})
+function uploadFileToGCS(upFile: Express.Multer.File): string {
+    const fileName = uuidv4() + '.wav';
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-const storage = new Storage({
-    projectId: "node-js-test-292505",
-    keyFilename: "./src/node-js-test-292505-c768dadc8230.json"
-});
-
-async function uploadFile(upFile: Express.Multer.File) {
-    /*await storage.bucket('example_backet').upload('./audioFile/testAudio.wav', {
-        gzip: true,
-        metadata: {
-            cacheControl: 'public, max-age=31536000',
-        },
+    const storage = new Storage({
+        projectId: "node-js-test-292505",
+        keyFilename: "./src/node-js-test-292505-c768dadc8230.json"
     });
 
-    console.log('uplaoded file');
-    uploadFile().catch(console.error);*/
-
-    const stream = await storage.bucket('example_backet').file("audio2.wav").createWriteStream({
+    const stream = storage.bucket('example_backet').file(fileName).createWriteStream({
         metadata: {
             contentType: 'audio/wav'
-        }
+        },
+        resumable: false
     });
     stream.on('error', (err) => {
         console.log(err);
     });
     stream.on('finish', () => {
-        console.log('upload file');
-    })
+        console.log('<GCS>upload file');
+    });
     stream.end(upFile.buffer);
-
-
+    return fileName;
 }
 
-const router: express.Router = express.Router();
-router.get('/api/getTest', (req: express.Request, res: express.Response) => {
-    res.send(req.query);
-    console.log(req.query);
-    //uploadFile();
+app.post('/api/', multer().single('upfile'), (req: express.Request, res: express.Response) => {
+    console.log(req.body.mail);
+    console.log(uploadFileToGCS(req.file));
+    res.send('Upload success!');
 });
-
-const upload = multer();
-const cpupload = upload.fields([{ name: 'upfile', maxCount: 1 }, { name: 'name', maxCount: 1 }]);
-app.post('/api/postTest', cpupload, (req: express.Request, res: express.Response) => {
-    res.send(req.body);
-    //console.log(req.body.mail);
-    //@ts-ignore
-    uploadFile(req.files['upfile'][0]);
-});
-app.use(router);
 
 app.listen(3000, () => { console.log('example app listening on port 3000!') });
