@@ -114,6 +114,25 @@ async function asyncRecognizeGCS(gcsURI: string) {
 
 }
 
+//GSTT
+async function asyncRecognizeGCS(gcsURI: string) {
+    const client = new Speech.SpeechClient();
+    const config = {
+        encoding: 'AudioEncoding',
+        languageCode: 'ja-JP',
+    };
+    const audio = {
+        uri: gcsURI,
+    };
+    const request = {
+        config: config,
+        audio: audio,
+    };
+
+    const [operation] = await client.longRunningRecognize(request);
+
+}
+
 app.post('/api/', multer().single('upfile'), (req: express.Request, res: express.Response) => {
     uploadFileToGCS(req.file, req.body.mail);
     res.send('Upload success!');
