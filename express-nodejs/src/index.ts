@@ -34,11 +34,11 @@ function uploadFileToGCS(upFile: Express.Multer.File): string {
     return fileName;
 }
 
-function writeTextFile(text: string) {
+function outputTextFile(text: string) {
     fs.writeFileSync('test.txt', text);
 }
 
-//GSTT
+
 async function asyncRecognizeGCS(gcsURI: string) {
     const client = new Speech.SpeechClient(gcpOptions);
     const config = {
@@ -60,12 +60,11 @@ async function asyncRecognizeGCS(gcsURI: string) {
     if (responese.results != null) {
         if (responese.results[0].alternatives != null) {
             const trancription = responese.results.map((result) => result.alternatives![0].transcript).join('\n');
-            writeTextFile(trancription);
+            outputTextFile(trancription);
         } else {
             console.log("文字を検出できませんでした。");
-            writeTextFile("文字を検出できませんでした。");
+            outputTextFile("文字を検出できませんでした。");
         }
-        //console.log(trancription);
     } else {
         console.log("[err]文字起こしに失敗しました");
     }
