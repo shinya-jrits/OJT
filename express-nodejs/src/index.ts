@@ -1,5 +1,6 @@
 import express from 'express'
 import { Storage } from '@google-cloud/storage'
+import Speech from '@google-cloud/speech'
 import multer from 'multer'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -27,6 +28,25 @@ function uploadFileToGCS(upFile: Express.Multer.File): string {
     });
     stream.end(upFile.buffer);
     return fileName;
+}
+
+//GSTT
+async function asyncRecognizeGCS(gcsURI: string) {
+    const client = new Speech.SpeechClient();
+    const config = {
+        encoding: 'AudioEncoding',
+        languageCode: 'ja-JP',
+    };
+    const audio = {
+        uri: gcsURI,
+    };
+    const request = {
+        config: config,
+        audio: audio,
+    };
+
+    const [operation] = await client.longRunningRecognize(request);
+
 }
 
 app.post('/api/', multer().single('upfile'), (req: express.Request, res: express.Response) => {
