@@ -3,8 +3,7 @@ import { Storage } from '@google-cloud/storage'
 import Speech from '@google-cloud/speech'
 import multer from 'multer'
 import { stringify, v4 as uuidv4 } from 'uuid'
-import sendgrid from '@sendgrid/mail'
-import { transform } from 'typescript'
+import fs from 'fs'
 
 const app: express.Express = express();
 
@@ -29,40 +28,17 @@ function uploadFileToGCS(upFile: Express.Multer.File, address: string) {
     });
     stream.on('finish', () => {
         console.log('<GCS>upload file');
-        asyncRecognizeGCS("gs://example_backet/" + fileName, address);
+        asyncRecognizeGCS("gs://example_backet/" + fileName);
     });
     stream.end(upFile.buffer);
 }
 
-function sendMail(trancription: string, address: string) {
-    const api_key = require('../node_modules/api_key/config')
-    sendgrid.setApiKey(api_key.sendgridAPI);
-    const bufferText = Buffer.from(trancription);
-    const msg = {
-        to: address,
-        from: 'shinya091118@gmail.com',
-        subject: '文字起こし結果',
-        //text: '文字起こしが完了しました。' + trancription.length + '文字でした。',
-        text: (trancription.length > 0) ? '文字起こしが完了しました。' + trancription.length + '文字でした。'
-            : '文字起こしに失敗しました',
-        attachments: [
-            {
-                content: bufferText.toString('base64'),
-                filename: 'result.txt',
-                type: 'text/plain',
-                disposition: 'attachment',
-                contentId: 'mytext',
-            }
-        ]
-    }
-    sendgrid.send(msg)
-        .then(() => { console.log("send mail success"); }, error => {
-            console.log(error);
-        })
+function outputTextFile(text: string) {
+    fs.writeFileSync('test.txt', text);
 }
 
 
-async function asyncRecognizeGCS(gcsURI: string, address: string) {
+async function asyncRecognizeGCS(gcsURI: string) {
     const client = new Speech.SpeechClient(gcpOptions);
     const config = {
         languageCode: 'ja-JP',
@@ -83,14 +59,13 @@ async function asyncRecognizeGCS(gcsURI: string, address: string) {
     if (responese.results != null) {
         if (responese.results[0].alternatives != null) {
             const trancription = responese.results.map((result) => result.alternatives![0].transcript).join('\n');
-            sendMail(trancription, address);
+            outputTextFile(trancription);
         } else {
             console.log("文字を検出できませんでした。");
-            sendMail("", address);
+            outputTextFile("文字を検出できませんでした。");
         }
     } else {
         console.log("[err]文字起こしに失敗しました");
-        sendMail("", address);
     }
 
 }
