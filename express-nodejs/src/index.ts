@@ -3,7 +3,7 @@ import { Storage } from '@google-cloud/storage'
 import Speech from '@google-cloud/speech'
 import multer from 'multer'
 import { stringify, v4 as uuidv4 } from 'uuid'
-import sendgrid, { send } from '@sendgrid/mail'
+import sendgrid from '@sendgrid/mail'
 
 const app: express.Express = express();
 
@@ -12,7 +12,7 @@ const gcpOptions = {
     keyFilename: "node_modules/api_key/node-js-test-292505-6e66a2144113.json"
 };
 
-function uploadFileToGCS(upFile: Express.Multer.File): string {
+function uploadFileToGCS(upFile: Express.Multer.File, address: string) {
     const fileName = uuidv4() + '.wav';
 
     const storage = new Storage(gcpOptions);
@@ -28,10 +28,9 @@ function uploadFileToGCS(upFile: Express.Multer.File): string {
     });
     stream.on('finish', () => {
         console.log('<GCS>upload file');
-        asyncRecognizeGCS("gs://example_backet/" + fileName);
+        asyncRecognizeGCS("gs://example_backet/" + fileName, address);
     });
     stream.end(upFile.buffer);
-    return fileName;
 }
 
 function sendMail(trancription: string, address: string) {
@@ -60,7 +59,7 @@ function sendMail(trancription: string, address: string) {
 }
 
 
-async function asyncRecognizeGCS(gcsURI: string) {
+async function asyncRecognizeGCS(gcsURI: string, address: string) {
     const client = new Speech.SpeechClient(gcpOptions);
     const config = {
         languageCode: 'ja-JP',
@@ -81,10 +80,10 @@ async function asyncRecognizeGCS(gcsURI: string) {
     if (responese.results != null) {
         if (responese.results[0].alternatives != null) {
             const trancription = responese.results.map((result) => result.alternatives![0].transcript).join('\n');
-            sendMail(trancription, "shinya091118@gmail.com");
+            sendMail(trancription, address);
         } else {
             console.log("文字を検出できませんでした。");
-            sendMail("文字を検出できませんでした。", "shinya091118@gmail.com");
+            sendMail("文字を検出できませんでした。", address);
         }
     } else {
         console.log("[err]文字起こしに失敗しました");
@@ -94,7 +93,7 @@ async function asyncRecognizeGCS(gcsURI: string) {
 
 app.post('/api/', multer().single('upfile'), (req: express.Request, res: express.Response) => {
     //console.log(req.body.mail);
-    uploadFileToGCS(req.file);
+    uploadFileToGCS(req.file, req.body.mail);
     res.send('Upload success!');
 });
 
