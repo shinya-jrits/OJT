@@ -4,6 +4,7 @@ import Speech from '@google-cloud/speech'
 import multer from 'multer'
 import { stringify, v4 as uuidv4 } from 'uuid'
 import sendgrid from '@sendgrid/mail'
+import { transform } from 'typescript'
 
 const app: express.Express = express();
 
@@ -41,7 +42,9 @@ function sendMail(trancription: string, address: string) {
         to: address,
         from: 'shinya091118@gmail.com',
         subject: '文字起こし結果',
-        text: '文字起こしが完了しました。' + trancription.length + '文字でした。',
+        //text: '文字起こしが完了しました。' + trancription.length + '文字でした。',
+        text: (trancription.length > 0) ? '文字起こしが完了しました。' + trancription.length + '文字でした。'
+            : '文字起こしに失敗しました',
         attachments: [
             {
                 content: bufferText.toString('base64'),
@@ -83,10 +86,11 @@ async function asyncRecognizeGCS(gcsURI: string, address: string) {
             sendMail(trancription, address);
         } else {
             console.log("文字を検出できませんでした。");
-            sendMail("文字を検出できませんでした。", address);
+            sendMail("", address);
         }
     } else {
         console.log("[err]文字起こしに失敗しました");
+        sendMail("", address);
     }
 
 }
