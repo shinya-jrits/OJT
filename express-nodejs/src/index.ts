@@ -3,7 +3,11 @@ import { Storage } from '@google-cloud/storage'
 import Speech from '@google-cloud/speech'
 import multer from 'multer'
 import { stringify, v4 as uuidv4 } from 'uuid'
+<<<<<<< HEAD
 import fs from 'fs'
+=======
+import sendgrid, { send } from '@sendgrid/mail'
+>>>>>>> ecaf09a5 ([add] テキストファイルをメールで送信する)
 
 const app: express.Express = express();
 
@@ -33,8 +37,29 @@ function uploadFileToGCS(upFile: Express.Multer.File, address: string) {
     stream.end(upFile.buffer);
 }
 
-function outputTextFile(text: string) {
-    fs.writeFileSync('test.txt', text);
+function sendMail(trancription: string, address: string) {
+    const api_key = require('../node_modules/api_key/config')
+    sendgrid.setApiKey(api_key.sendgridAPI);
+    const bufferText = Buffer.from(trancription);
+    const msg = {
+        to: address,
+        from: 'shinya091118@gmail.com',
+        subject: '文字起こし結果',
+        text: '文字起こしが完了しました。' + trancription.length + '文字でした。',
+        attachments: [
+            {
+                content: bufferText.toString('base64'),
+                filename: 'result.txt',
+                type: 'text/plain',
+                disposition: 'attachment',
+                contentId: 'mytext',
+            }
+        ]
+    }
+    sendgrid.send(msg)
+        .then(() => { console.log("send mail success"); }, error => {
+            console.log(error);
+        })
 }
 
 
@@ -59,10 +84,10 @@ async function asyncRecognizeGCS(gcsURI: string) {
     if (responese.results != null) {
         if (responese.results[0].alternatives != null) {
             const trancription = responese.results.map((result) => result.alternatives![0].transcript).join('\n');
-            outputTextFile(trancription);
+            sendMail(trancription, "shinya091118@gmail.com");
         } else {
             console.log("文字を検出できませんでした。");
-            outputTextFile("文字を検出できませんでした。");
+            sendMail("文字を検出できませんでした。", "shinya091118@gmail.com");
         }
     } else {
         console.log("[err]文字起こしに失敗しました");
