@@ -3,11 +3,7 @@ import { Storage } from '@google-cloud/storage'
 import Speech from '@google-cloud/speech'
 import multer from 'multer'
 import { stringify, v4 as uuidv4 } from 'uuid'
-<<<<<<< HEAD
-import fs from 'fs'
-=======
-import sendgrid, { send } from '@sendgrid/mail'
->>>>>>> ecaf09a5 ([add] テキストファイルをメールで送信する)
+import sendgrid from '@sendgrid/mail'
 
 const app: express.Express = express();
 
@@ -32,7 +28,7 @@ function uploadFileToGCS(upFile: Express.Multer.File, address: string) {
     });
     stream.on('finish', () => {
         console.log('<GCS>upload file');
-        asyncRecognizeGCS("gs://example_backet/" + fileName);
+        asyncRecognizeGCS("gs://example_backet/" + fileName, address);
     });
     stream.end(upFile.buffer);
 }
@@ -63,7 +59,7 @@ function sendMail(trancription: string, address: string) {
 }
 
 
-async function asyncRecognizeGCS(gcsURI: string) {
+async function asyncRecognizeGCS(gcsURI: string, address: string) {
     const client = new Speech.SpeechClient(gcpOptions);
     const config = {
         languageCode: 'ja-JP',
@@ -84,10 +80,10 @@ async function asyncRecognizeGCS(gcsURI: string) {
     if (responese.results != null) {
         if (responese.results[0].alternatives != null) {
             const trancription = responese.results.map((result) => result.alternatives![0].transcript).join('\n');
-            sendMail(trancription, "shinya091118@gmail.com");
+            sendMail(trancription, address);
         } else {
             console.log("文字を検出できませんでした。");
-            sendMail("文字を検出できませんでした。", "shinya091118@gmail.com");
+            sendMail("文字を検出できませんでした。", address);
         }
     } else {
         console.log("[err]文字起こしに失敗しました");
