@@ -4,9 +4,6 @@ import Speech from '@google-cloud/speech'
 import multer from 'multer'
 import { stringify, v4 as uuidv4 } from 'uuid'
 import sendgrid from '@sendgrid/mail'
-import { transform } from 'typescript'
-
-const app: express.Express = express();
 
 const gcpOptions = {
     projectId: "node-js-test-292505",
@@ -42,7 +39,6 @@ function sendMail(trancription: string, address: string) {
         to: address,
         from: 'shinya091118@gmail.com',
         subject: '文字起こし結果',
-        //text: '文字起こしが完了しました。' + trancription.length + '文字でした。',
         text: (trancription.length > 0) ? '文字起こしが完了しました。' + trancription.length + '文字でした。'
             : '文字起こしに失敗しました',
         attachments: [
@@ -95,9 +91,18 @@ async function asyncRecognizeGCS(gcsURI: string, address: string) {
 
 }
 
+const app: express.Express = express();
+
+app.use(function (req, res, next) {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+})
+
 app.post('/api/', multer().single('upfile'), (req: express.Request, res: express.Response) => {
+    console.log(req.body);
     uploadFileToGCS(req.file, req.body.mail);
     res.send('Upload success!');
 });
 
-app.listen(3000, () => { console.log('example app listening on port 3000!') });
+app.listen(4000, () => { console.log('example app listening on port 4000!') });
