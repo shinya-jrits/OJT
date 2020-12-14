@@ -13,7 +13,7 @@ function uploadFileToGCS(upFile: Express.Multer.File): string {
         keyFilename: "./src/node-js-test-292505-c768dadc8230.json"
     });
 
-    const stream = storage.bucket('example_backet').file(fileName).createWriteStream({
+    const stream = storage.bucket('meeting_voice_jrits').file(fileName).createWriteStream({
         metadata: {
             contentType: 'audio/wav'
         },
