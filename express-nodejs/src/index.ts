@@ -1,7 +1,6 @@
 import express from 'express'
 import { Storage } from '@google-cloud/storage'
 import Speech from '@google-cloud/speech'
-import multer from 'multer'
 import { stringify, v4 as uuidv4 } from 'uuid'
 import sendgrid from '@sendgrid/mail'
 
@@ -10,14 +9,13 @@ const gcpOptions = {
     keyFilename: "node_modules/api_key/node-js-test-292505-6e66a2144113.json"
 };
 
-function uploadFileToGCS(upFile: Express.Multer.File, address: string) {
+function uploadFileToGCS(upFile: Buffer, address: string) {
     const fileName = uuidv4() + '.wav';
-
     const storage = new Storage(gcpOptions);
 
     const stream = storage.bucket('meeting_voice_jrits').file(fileName).createWriteStream({
         metadata: {
-            contentType: 'audio/wav'
+            contentType: 'audio/wav',
         },
         resumable: false
     });
@@ -28,11 +26,11 @@ function uploadFileToGCS(upFile: Express.Multer.File, address: string) {
         console.log('<GCS>upload file');
         asyncRecognizeGCS("gs://example_backet/" + fileName, address);
     });
-    stream.end(upFile.buffer);
+    stream.end(upFile);
 }
 
 function sendMail(trancription: string, address: string) {
-    const api_key = require('../node_modules/api_key/config')
+    const api_key = require('../node_modules/api_key/config');
     sendgrid.setApiKey(api_key.sendgridAPI);
     const bufferText = Buffer.from(trancription);
     const msg = {
@@ -56,7 +54,6 @@ function sendMail(trancription: string, address: string) {
             console.log(error);
         })
 }
-
 
 async function asyncRecognizeGCS(gcsURI: string, address: string) {
     const client = new Speech.SpeechClient(gcpOptions);
@@ -93,16 +90,18 @@ async function asyncRecognizeGCS(gcsURI: string, address: string) {
 
 const app: express.Express = express();
 
+app.use(express.json({ limit: '1000mb' }));
 app.use(function (req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     next();
 })
 
-app.post('/api/', multer().single('upfile'), (req: express.Request, res: express.Response) => {
-    console.log(req.body);
-    uploadFileToGCS(req.file, req.body.mail);
-    res.send('Upload success!');
+app.post('/api/', (req: express.Request, res: express.Response) => {
+    const fileData = req.body.file.replace(/^data:\w+\/\w+;base64,/, '');
+    const decodedFile = Buffer.from(fileData, "base64");
+    uploadFileToGCS(decodedFile, req.body.mail);
+    res.send("success");
 });
 
 app.listen(4000, () => { console.log('example app listening on port 4000!') });
