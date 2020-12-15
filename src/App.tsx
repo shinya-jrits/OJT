@@ -33,7 +33,8 @@ class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
         });
       })
     }
-    if (event.target.value != null) {
+    if (event.target.type === 'email') {
+      console.log(event.target.value);
       this.setState({
         EmailAddress: event.target.value,
       });
@@ -44,36 +45,24 @@ class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
     const result = this.convertVideoToAudio(this.state.videoFile);
 
     result.then((file) => {
-      //postリクエスト
-      console.log("post sending ")
-      const params = new FormData();
-      params.append('mail', this.state.EmailAddress);
-      params.append('file', file);
-
-      axios.post("http://localhost:4000/api/", params, {
-        headers: {
-          'content-type': 'multipart/form-data',
-        },
-      })
-        .then(function (responese) {
-          console.log("post request success");
-          window.alert("送信に成功しました");
+      const reader = new FileReader();
+      const adderess = this.state.EmailAddress;
+      reader.readAsDataURL(new Blob([file], { type: 'audio/wav' }));
+      reader.onload = function () {
+        axios.post("http://localhost:4000/api/", {
+          mail: adderess,
+          file: reader.result
         })
-        .then(function (error) {
-          console.log(console.error);
-          window.alert("送信に失敗しました")
-        });
+          .then(function (responese) {
+            console.log("post request success");
+            window.alert("送信に成功しました");
+          })
+          .catch(function (error) {
+            console.log(console.error);
+            window.alert("送信に失敗しました")
+          });
+      }
     });
-
-    //リリース前には削除予定
-    /*result.then((result) => {
-      const url = window.URL.createObjectURL(new Blob([result]));
-      const anchor = document.createElement('a');
-      anchor.href = url;
-      anchor.setAttribute('download', 'audio.wav');
-      anchor.click();
-
-    })*/
     event.preventDefault();//ページ遷移を防ぐため
   }
   render() {
