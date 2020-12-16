@@ -4,15 +4,16 @@ import Speech from '@google-cloud/speech'
 import { stringify, v4 as uuidv4 } from 'uuid'
 import sendgrid from '@sendgrid/mail'
 
-const gcpOptions = {
-    projectId: "node-js-test-292505",
-    keyFilename: "node_modules/api_key/node-js-test-292505-6e66a2144113.json"
-};
+namespace GoogleCloud {
+    export const gcpOptions = {
+        projectId: "node-js-test-292505",
+        keyFilename: "node_modules/api_key/node-js-test-292505-6e66a2144113.json"
+    };
+}
 
 function uploadFileToGCS(upFile: Buffer, address: string) {
     const fileName = uuidv4() + '.wav';
-    const storage = new Storage(gcpOptions);
-
+    const storage = new Storage(GoogleCloud.gcpOptions);
     const stream = storage.bucket('meeting_voice_jrits').file(fileName).createWriteStream({
         metadata: {
             contentType: 'audio/wav',
@@ -56,7 +57,7 @@ function sendMail(trancription: string, address: string) {
 }
 
 async function asyncRecognizeGCS(gcsURI: string, address: string) {
-    const client = new Speech.SpeechClient(gcpOptions);
+    const client = new Speech.SpeechClient(GoogleCloud.gcpOptions);
     const config = {
         languageCode: 'ja-JP',
         enableAutomaticPunctuation: true,
