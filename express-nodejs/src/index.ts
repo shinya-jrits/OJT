@@ -72,7 +72,6 @@ async function asyncRecognizeGCS(gcsURI: string) {
 }
 
 app.post('/api/', multer().single('upfile'), (req: express.Request, res: express.Response) => {
-    //console.log(req.body.mail);
     uploadFileToGCS(req.file);
     res.send('Upload success!');
 });
