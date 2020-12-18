@@ -25,7 +25,7 @@ function uploadFileToGCS(upFile: Buffer, address: string) {
     });
     stream.on('finish', () => {
         console.log('<GCS>upload file');
-        asyncRecognizeGCS("gs://example_backet/" + fileName, address);
+        speechToText("gs://example_backet/" + fileName, address);
     });
     stream.end(upFile);
 }
@@ -56,14 +56,14 @@ function sendMail(trancription: string, address: string) {
         })
 }
 
-async function asyncRecognizeGCS(gcsURI: string, address: string) {
+async function speechToText(fileUri: string, address: string) {
     const client = new Speech.SpeechClient(GoogleCloud.gcpOptions);
     const config = {
         languageCode: 'ja-JP',
         enableAutomaticPunctuation: true,
     };
     const audio = {
-        uri: gcsURI,
+        uri: fileUri,
     };
     const request = {
         config: config,
