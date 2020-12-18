@@ -18,7 +18,7 @@ function uploadFileToGCS(upFile: Express.Multer.File, address: string) {
 
     const storage = new Storage(gcpOptions);
 
-    const stream = storage.bucket('example_backet').file(fileName).createWriteStream({
+    const stream = storage.bucket('meeting_voice_jrits').file(fileName).createWriteStream({
         metadata: {
             contentType: 'audio/wav'
         },
