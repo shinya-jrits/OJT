@@ -91,7 +91,8 @@ async function speechToText(fileUri: string, address: string) {
 
 const app: express.Express = express();
 
-app.use(express.json({ limit: '1000mb' }));
+//1時間あたり100mb程度なので2~3時間程度と予想する
+app.use(express.json({ limit: '300mb' }));
 app.use(function (req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
