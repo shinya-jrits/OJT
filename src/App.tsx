@@ -6,7 +6,7 @@ import { Buffer } from 'buffer';
 
 interface convertVideoToAudioStateInterface {
   videoFile: File;
-  EmailAddress: string;
+  emailAddress: string;
 }
 
 class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
@@ -37,7 +37,7 @@ class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
     if (event.target.type === 'email') {
       console.log(event.target.value);
       this.setState({
-        EmailAddress: event.target.value,
+        emailAddress: event.target.value,
       });
     }
   }
@@ -46,7 +46,7 @@ class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
     const result = this.convertVideoToAudio(this.state.videoFile);
     result.then((file) => {
       const encodedFile = Buffer.from(file).toString('base64');
-      const adderess = this.state.EmailAddress;
+      const adderess = this.state.emailAddress;
       axios.post("http://localhost:4000/api/", {
         mail: adderess,
         file: encodedFile
