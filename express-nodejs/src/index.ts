@@ -99,8 +99,7 @@ app.use(function (req, res, next) {
 })
 
 app.post('/api/', (req: express.Request, res: express.Response) => {
-    const fileData = req.body.file.replace(/^data:\w+\/\w+;base64,/, '');
-    const decodedFile = Buffer.from(fileData, "base64");
+    const decodedFile = Buffer.from(req.body.file, "base64");
     uploadFileToGCS(decodedFile, req.body.mail);
     res.send("success");
 });
