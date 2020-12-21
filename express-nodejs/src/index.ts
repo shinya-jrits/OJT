@@ -30,15 +30,15 @@ function uploadFileToGCS(upFile: Buffer, address: string) {
     stream.end(upFile);
 }
 
-function sendMail(trancription: string, address: string) {
+function sendMail(transcription: string, address: string) {
     const api_key = require('../node_modules/api_key/config');
     sendgrid.setApiKey(api_key.sendgridAPI);
-    const bufferText = Buffer.from(trancription);
+    const bufferText = Buffer.from(transcription);
     const msg = {
         to: address,
         from: 'shinya091118@gmail.com',
         subject: '文字起こし結果',
-        text: (trancription.length > 0) ? '文字起こしが完了しました。' + trancription.length + '文字でした。'
+        text: (transcription.length > 0) ? '文字起こしが完了しました。' + transcription.length + '文字でした。'
             : '文字起こしに失敗しました',
         attachments: [
             {
