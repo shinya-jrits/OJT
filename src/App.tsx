@@ -42,24 +42,22 @@ class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
     }
   }
   handleSubmit = (event: React.FormEvent<HTMLFormElement>): void => {
-
-    const result = this.convertVideoToAudio(this.state.videoFile);
-    result.then((file) => {
-      const encodedFile = Buffer.from(file).toString('base64');
-      const adderess = this.state.emailAddress;
-      axios.post("http://localhost:4000/api/", {
-        mail: adderess,
-        file: encodedFile
-      })
-        .then(function (response) {
-          console.log("post request success");
-          window.alert("送信に成功しました");
-        })
-        .catch(function (error) {
-          console.log(console.error);
-          window.alert("送信に失敗しました")
+    (async () => {
+      try {
+        const audioFile = await this.convertVideoToAudio(this.state.videoFile);
+        const encodedFile = Buffer.from(audioFile).toString('base64');
+        const address = this.state.emailAddress;
+        await axios.post("https://node-js-test-292505.uc.r.appspot.com/api/", {
+          mail: address,
+          file: encodedFile
         });
-    });
+        console.log("post request success");
+        window.alert("送信に成功しました");
+      } catch (error) {
+        console.log(console.error);
+        window.alert("送信に失敗しました");
+      }
+    })();
     event.preventDefault();//ページ遷移を防ぐため
   }
   render() {
