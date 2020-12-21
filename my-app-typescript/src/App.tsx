@@ -2,6 +2,7 @@ import React from 'react';
 import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg';
 import './App.css';
 import axios from 'axios';
+import { Buffer } from 'buffer';
 
 interface convertVideoToAudioStateInterface {
   videoFile: File;
@@ -43,25 +44,21 @@ class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
   handleSubmit = (event: React.FormEvent<HTMLFormElement>): void => {
 
     const result = this.convertVideoToAudio(this.state.videoFile);
-
     result.then((file) => {
-      const reader = new FileReader();
+      const encodedFile = Buffer.from(file).toString('base64');
       const adderess = this.state.EmailAddress;
-      reader.readAsDataURL(new Blob([file], { type: 'audio/wav' }));
-      reader.onload = function () {
-        axios.post("https://node-js-test-292505.uc.r.appspot.com/api/", {
-          mail: adderess,
-          file: reader.result
+      axios.post("http://localhost:4000/api/", {
+        mail: adderess,
+        file: encodedFile
+      })
+        .then(function (response) {
+          console.log("post request success");
+          window.alert("送信に成功しました");
         })
-          .then(function (responese) {
-            console.log("post request success");
-            window.alert("送信に成功しました");
-          })
-          .catch(function (error) {
-            console.log(console.error);
-            window.alert("送信に失敗しました")
-          });
-      }
+        .catch(function (error) {
+          console.log(console.error);
+          window.alert("送信に失敗しました")
+        });
     });
     event.preventDefault();//ページ遷移を防ぐため
   }
