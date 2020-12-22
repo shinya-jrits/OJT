@@ -3,18 +3,18 @@ import { Storage } from '@google-cloud/storage'
 import Speech from '@google-cloud/speech'
 import { stringify, v4 as uuidv4 } from 'uuid'
 import sendgrid from '@sendgrid/mail'
+import { SecretManagerServiceClient } from '@google-cloud/secret-manager'
 
 namespace GoogleCloud {
     export const gcpOptions = {
-        projectId: "node-js-test-292505",
-        keyFilename: "node_modules/api_key/node-js-test-292505-6e66a2144113.json"
+        projectId: "node-js-test-292505"
     };
 }
 
 function uploadFileToGCS(upFile: Buffer, address: string) {
     const fileName = uuidv4() + '.wav';
     const storage = new Storage(GoogleCloud.gcpOptions);
-    const stream = storage.bucket('example_backet').file(fileName).createWriteStream({
+    const stream = storage.bucket('meeting_voice_data_jrits').file(fileName).createWriteStream({
         metadata: {
             contentType: 'audio/wav',
         },
@@ -25,35 +25,55 @@ function uploadFileToGCS(upFile: Buffer, address: string) {
     });
     stream.on('finish', () => {
         console.log('<GCS>upload file');
-        speechToText("gs://example_backet/" + fileName, address);
+        speechToText("gs://meeting_voice_data_jrits/" + fileName, address);
     });
     stream.end(upFile);
 }
 
-function sendMail(transcription: string, address: string) {
-    const api_key = require('../node_modules/api_key/config');
-    sendgrid.setApiKey(api_key.sendgridAPI);
-    const bufferText = Buffer.from(transcription);
-    const msg = {
-        to: address,
-        from: 'shinya091118@gmail.com',
-        subject: '文字起こし結果',
-        text: (transcription.length > 0) ? '文字起こしが完了しました。' + transcription.length + '文字でした。'
-            : '文字起こしに失敗しました',
-        attachments: [
-            {
-                content: bufferText.toString('base64'),
-                filename: 'result.txt',
-                type: 'text/plain',
-                disposition: 'attachment',
-                contentId: 'mytext',
-            }
-        ]
+async function sendMail(transcription: string, address: string) {
+    try {
+        const apiKey = await getSecretApi();
+        if (apiKey != null) {
+            sendgrid.setApiKey(apiKey);
+        } else {
+            console.log("api keyの取得に失敗しました");
+            return;
+        }
+
+        const bufferText = Buffer.from(transcription);
+        const msg = {
+            to: address,
+            from: 'shinya091118@gmail.com',
+            subject: '文字起こし結果',
+            text: (transcription.length > 0) ? '文字起こしが完了しました。' + transcription.length + '文字でした。'
+                : '文字起こしに失敗しました',
+            attachments: [
+                {
+                    content: bufferText.toString('base64'),
+                    filename: 'result.txt',
+                    type: 'text/plain',
+                    disposition: 'attachment',
+                    contentId: 'mytext',
+                }
+            ]
+        }
+        await sendgrid.send(msg);
+        console.log("send mail success");
+    } catch (err) {
+        console.error(err.toString());
     }
-    sendgrid.send(msg)
-        .then(() => { console.log("send mail success"); }, error => {
-            console.log(error);
-        })
+}
+
+async function getSecretApi(): Promise<string | null> {
+    const client = new SecretManagerServiceClient(GoogleCloud.gcpOptions);
+    const [accessResponse] = await client.accessSecretVersion({
+        name: 'projects/972015880934/secrets/sendgrid_api_key/versions/latest',
+    })
+    if (accessResponse.payload?.data != null) {
+        const responsePayload = accessResponse.payload.data.toString();
+        return responsePayload;
+    }
+    return null;
 }
 
 async function speechToText(fileUri: string, address: string) {
