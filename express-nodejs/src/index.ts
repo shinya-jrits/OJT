@@ -66,7 +66,6 @@ async function sendMail(transcription: string, address: string) {
 
 async function getSecretApi(secretId: string): Promise<string | null> {
     const client = new SecretManagerServiceClient();
-    console.log("getSecretkey");
     const [accessResponse] = await client.accessSecretVersion({
         name: 'projects/972015880934/secrets/' + secretId + '/versions/latest',
     })
