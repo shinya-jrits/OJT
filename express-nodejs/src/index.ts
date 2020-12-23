@@ -5,15 +5,14 @@ import { stringify, v4 as uuidv4 } from 'uuid'
 import sendgrid from '@sendgrid/mail'
 import { SecretManagerServiceClient } from '@google-cloud/secret-manager'
 
-namespace GoogleCloud {
-    export const gcpOptions = {
-        projectId: "node-js-test-292505"
-    };
+namespace EnvironmentVariable {
+    export const apiKey = getSecretApi('sendgrid_api_key');
+    export const address = getSecretApi('send_email_address');
 }
 
 function uploadFileToGCS(upFile: Buffer, address: string) {
     const fileName = uuidv4() + '.wav';
-    const storage = new Storage(GoogleCloud.gcpOptions);
+    const storage = new Storage();
     const stream = storage.bucket('meeting_voice_data_jrits').file(fileName).createWriteStream({
         metadata: {
             contentType: 'audio/wav',
@@ -32,7 +31,7 @@ function uploadFileToGCS(upFile: Buffer, address: string) {
 
 async function sendMail(transcription: string, address: string) {
     try {
-        const apiKey = await getSecretApi();
+        const apiKey = await EnvironmentVariable.apiKey;
         if (apiKey != null) {
             sendgrid.setApiKey(apiKey);
         } else {
@@ -41,9 +40,10 @@ async function sendMail(transcription: string, address: string) {
         }
 
         const bufferText = Buffer.from(transcription);
+        const emailadress = await EnvironmentVariable.address;
         const msg = {
             to: address,
-            from: 'shinya091118@gmail.com',
+            from: (emailadress != null) ? emailadress : "",
             subject: '文字起こし結果',
             text: (transcription.length > 0) ? '文字起こしが完了しました。' + transcription.length + '文字でした。'
                 : '文字起こしに失敗しました',
@@ -64,10 +64,11 @@ async function sendMail(transcription: string, address: string) {
     }
 }
 
-async function getSecretApi(): Promise<string | null> {
-    const client = new SecretManagerServiceClient(GoogleCloud.gcpOptions);
+async function getSecretApi(secretId: string): Promise<string | null> {
+    const client = new SecretManagerServiceClient();
+    console.log("getSecretkey");
     const [accessResponse] = await client.accessSecretVersion({
-        name: 'projects/972015880934/secrets/sendgrid_api_key/versions/latest',
+        name: 'projects/972015880934/secrets/' + secretId + '/versions/latest',
     })
     if (accessResponse.payload?.data != null) {
         const responsePayload = accessResponse.payload.data.toString();
@@ -77,7 +78,7 @@ async function getSecretApi(): Promise<string | null> {
 }
 
 async function speechToText(fileUri: string, address: string) {
-    const client = new Speech.SpeechClient(GoogleCloud.gcpOptions);
+    const client = new Speech.SpeechClient();
     const config = {
         languageCode: 'ja-JP',
         enableAutomaticPunctuation: true,
@@ -125,4 +126,6 @@ app.post('/api/', (req: express.Request, res: express.Response) => {
     res.send("success");
 });
 
-app.listen(4000, () => { console.log('example app listening on port 4000!') });
+app.listen(4000, () => {
+    console.log('example app listening on port 4000!')
+});
