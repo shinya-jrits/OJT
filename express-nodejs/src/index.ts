@@ -4,6 +4,7 @@ import Speech from '@google-cloud/speech'
 import { stringify, v4 as uuidv4 } from 'uuid'
 import sendgrid from '@sendgrid/mail'
 import { SecretManagerServiceClient } from '@google-cloud/secret-manager'
+import multer from 'multer'
 
 namespace EnvironmentVariable {
     export const apiKey = getSecretApi('sendgrid_api_key');
@@ -111,15 +112,15 @@ async function speechToText(fileUri: string, address: string) {
 
 const app: express.Express = express();
 
-//1時間あたり100mb程度なので2~3時間程度と予想する
-app.use(express.json({ limit: '300mb' }));
+//1時間あたり100mb程度なので2~3時間程度でbase64でファイルサイズが大きくなる(1.4倍)ことを予想する
+app.use(express.json({ limit: '420mb' }));
 app.use(function (req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     next();
 })
 
-app.post('/api/', (req: express.Request, res: express.Response) => {
+app.post('/api/', multer().fields([]), (req: express.Request, res: express.Response) => {
     const decodedFile = Buffer.from(req.body.file, "base64");
     uploadFileToGCS(decodedFile, req.body.mail);
     res.send("success");
