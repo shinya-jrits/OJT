@@ -18,17 +18,38 @@
     "multer": "^1.4.2",
     "prettier": "^2.2.1",
     "ts-node": "^9.1.1",
-    "typescript": "^4.1.2",
     "uuid": "^8.3.1"
   },
   "devDependencies": {
-    "ts-node-dev": "^1.0.0"
+    "@types/jest": "^26.0.19",
+    "jest": "^26.6.3",
+    "ts-jest": "^26.4.4",
+    "ts-node-dev": "^1.0.0",
+    "typescript": "^4.1.3"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "ts-node src/index.ts",
-    "dev:watch": "ts-node-dev  src/index.ts"
+    "dev:watch": "ts-node-dev  src/index.ts",
+    "jest": "jest"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "jest": {
+    "moduleFileExtensions": [
+      "ts",
+      "js"
+    ],
+    "transform": {
+      "^.+\\.ts$": "ts-jest"
+    },
+    "globals": {
+      "ts-jest": {
+        "tsconfig": "tsconfig.json"
+      }
+    },
+    "testMatch": [
+      "**/tests/**/*.test.ts"
+    ]
+  }
 }
