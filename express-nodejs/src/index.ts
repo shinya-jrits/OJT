@@ -30,6 +30,8 @@ function uploadFileToGCS(upFile: Buffer, address: string) {
     stream.end(upFile);
 }
 
+export { uploadFileToGCS };
+
 async function sendMail(transcription: string, address: string) {
     try {
         const apiKey = await EnvironmentVariable.apiKey;
