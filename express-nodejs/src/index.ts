@@ -7,8 +7,8 @@ import { SecretManagerServiceClient } from '@google-cloud/secret-manager'
 import multer from 'multer'
 
 namespace EnvironmentVariable {
-    export const apiKey = getSecretApi('sendgrid_api_key');
-    export const address = getSecretApi('send_email_address');
+    export const apiKey = getSecretApiKey('sendgrid_api_key');
+    export const address = getSecretApiKey('send_email_address');
 }
 
 function uploadFileToGCS(upFile: Buffer, address: string) {
@@ -65,7 +65,7 @@ async function sendMail(transcription: string, address: string) {
     }
 }
 
-async function getSecretApi(secretId: string): Promise<string | null> {
+async function getSecretApiKey(secretId: string): Promise<string | null> {
     const client = new SecretManagerServiceClient();
     const [accessResponse] = await client.accessSecretVersion({
         name: 'projects/972015880934/secrets/' + secretId + '/versions/latest',
