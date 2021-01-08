@@ -11,21 +11,19 @@ namespace EnvironmentVariable {
     export const address = getSecretApiKey('send_email_address');
 }
 
-function uploadFileToGCS(upFile: Buffer, address: string) {
+function uploadFileToGCS(upFile: Buffer, storage: Storage, onFinish: (fileName: string) => void) {
     const fileName = uuidv4() + '.wav';
-    const storage = new Storage();
     const stream = storage.bucket('meeting_voice_data_jrits').file(fileName).createWriteStream({
         metadata: {
             contentType: 'audio/wav',
         },
         resumable: false
     });
-    stream.on('error', (err) => {
-        console.log(err);
+
+    stream.on('error', (onerror) => {
     });
     stream.on('finish', () => {
-        console.log('<GCS>upload file');
-        speechToText("gs://meeting_voice_data_jrits/" + fileName, address);
+        onFinish(fileName);
     });
     stream.end(upFile);
 }
@@ -100,7 +98,7 @@ async function speechToText(fileUri: string, address: string) {
     if (responese.results != null) {
         if (responese.results[0].alternatives != null) {
             const trancription = responese.results.map((result) => result.alternatives![0].transcript).join('\n');
-            sendMail(trancription, address);
+            sendMail(trancription, address);//本来やるべきではない
         } else {
             console.log("文字を検出できませんでした。");
             sendMail("", address);
@@ -124,7 +122,9 @@ app.use(function (req, res, next) {
 
 app.post('/api/', multer().fields([]), (req: express.Request, res: express.Response) => {
     const decodedFile = Buffer.from(req.body.file, "base64");
-    uploadFileToGCS(decodedFile, req.body.mail);
+    uploadFileToGCS(decodedFile, new Storage(), (fileName) => {
+        speechToText(fileName, req.body.mail);
+    });
     res.send("success");
 });
 
