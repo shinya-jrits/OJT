@@ -14,7 +14,7 @@ namespace EnvironmentVariable {
 function uploadFileToGCS(upFile: Buffer, address: string) {
     const fileName = uuidv4() + '.wav';
     const storage = new Storage();
-    const stream = storage.bucket('meeting_voice_data_jrits').file(fileName).createWriteStream({
+    const stream = storage.bucket('meeting_voice_file_jrits').file(fileName).createWriteStream({
         metadata: {
             contentType: 'audio/wav',
         },
