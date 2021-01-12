@@ -25,7 +25,7 @@ function uploadFileToGCS(upFile: Buffer, address: string) {
     });
     stream.on('finish', () => {
         console.log('<GCS>upload file');
-        speechToText("gs://meeting_voice_data_jrits/" + fileName, address);
+        speechToText("gs://meeting_voice_file_jrits/" + fileName, address);
     });
     stream.end(upFile);
 }
