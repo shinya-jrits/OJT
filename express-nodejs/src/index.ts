@@ -1,26 +1,22 @@
 import express from 'express'
 import { Storage } from '@google-cloud/storage'
 import Speech from '@google-cloud/speech'
-import multer from 'multer'
 import { stringify, v4 as uuidv4 } from 'uuid'
 import sendgrid from '@sendgrid/mail'
-import { transform } from 'typescript'
 
-const app: express.Express = express();
+namespace GoogleCloud {
+    export const gcpOptions = {
+        projectId: "node-js-test-292505",
+        keyFilename: "node_modules/api_key/node-js-test-292505-6e66a2144113.json"
+    };
+}
 
-const gcpOptions = {
-    projectId: "node-js-test-292505",
-    keyFilename: "node_modules/api_key/node-js-test-292505-6e66a2144113.json"
-};
-
-function uploadFileToGCS(upFile: Express.Multer.File, address: string) {
+function uploadFileToGCS(upFile: Buffer, address: string) {
     const fileName = uuidv4() + '.wav';
-
-    const storage = new Storage(gcpOptions);
-
+    const storage = new Storage(GoogleCloud.gcpOptions);
     const stream = storage.bucket('meeting_voice_jrits').file(fileName).createWriteStream({
         metadata: {
-            contentType: 'audio/wav'
+            contentType: 'audio/wav',
         },
         resumable: false
     });
@@ -29,21 +25,20 @@ function uploadFileToGCS(upFile: Express.Multer.File, address: string) {
     });
     stream.on('finish', () => {
         console.log('<GCS>upload file');
-        asyncRecognizeGCS("gs://example_backet/" + fileName, address);
+        speechToText("gs://example_backet/" + fileName, address);
     });
-    stream.end(upFile.buffer);
+    stream.end(upFile);
 }
 
-function sendMail(trancription: string, address: string) {
-    const api_key = require('../node_modules/api_key/config')
+function sendMail(transcription: string, address: string) {
+    const api_key = require('../node_modules/api_key/config');
     sendgrid.setApiKey(api_key.sendgridAPI);
-    const bufferText = Buffer.from(trancription);
+    const bufferText = Buffer.from(transcription);
     const msg = {
         to: address,
         from: 'shinya091118@gmail.com',
         subject: '文字起こし結果',
-        //text: '文字起こしが完了しました。' + trancription.length + '文字でした。',
-        text: (trancription.length > 0) ? '文字起こしが完了しました。' + trancription.length + '文字でした。'
+        text: (transcription.length > 0) ? '文字起こしが完了しました。' + transcription.length + '文字でした。'
             : '文字起こしに失敗しました',
         attachments: [
             {
@@ -61,15 +56,14 @@ function sendMail(trancription: string, address: string) {
         })
 }
 
-
-async function asyncRecognizeGCS(gcsURI: string, address: string) {
-    const client = new Speech.SpeechClient(gcpOptions);
+async function speechToText(fileUri: string, address: string) {
+    const client = new Speech.SpeechClient(GoogleCloud.gcpOptions);
     const config = {
         languageCode: 'ja-JP',
         enableAutomaticPunctuation: true,
     };
     const audio = {
-        uri: gcsURI,
+        uri: fileUri,
     };
     const request = {
         config: config,
@@ -95,9 +89,20 @@ async function asyncRecognizeGCS(gcsURI: string, address: string) {
 
 }
 
-app.post('/api/', multer().single('upfile'), (req: express.Request, res: express.Response) => {
-    uploadFileToGCS(req.file, req.body.mail);
-    res.send('Upload success!');
+const app: express.Express = express();
+
+//1時間あたり100mb程度なので2~3時間程度と予想する
+app.use(express.json({ limit: '300mb' }));
+app.use(function (req, res, next) {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+})
+
+app.post('/api/', (req: express.Request, res: express.Response) => {
+    const decodedFile = Buffer.from(req.body.file, "base64");
+    uploadFileToGCS(decodedFile, req.body.mail);
+    res.send("success");
 });
 
-app.listen(3000, () => { console.log('example app listening on port 3000!') });
+app.listen(4000, () => { console.log('example app listening on port 4000!') });
