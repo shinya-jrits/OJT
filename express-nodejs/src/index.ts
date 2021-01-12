@@ -25,6 +25,7 @@ function uploadFileToGCS(upFile: Buffer, address: string) {
     });
     stream.on('finish', () => {
         console.log('<GCS>upload file');
+
         speechToText("gs://meeting_voice_file_jrits/" + fileName, address);
     });
     stream.end(upFile);
@@ -79,6 +80,7 @@ async function getSecretApiKey(secretId: string): Promise<string | null> {
 
 async function speechToText(fileUri: string, address: string) {
     const client = new Speech.SpeechClient();
+
     const config = {
         languageCode: 'ja-JP',
         enableAutomaticPunctuation: true,
@@ -114,6 +116,7 @@ const app: express.Express = express();
 
 //1時間あたり100mb程度なので2~3時間程度でbase64でファイルサイズが大きくなる(1.4倍)ことを予想する
 app.use(express.json({ limit: '420mb' }));
+
 app.use(function (req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
