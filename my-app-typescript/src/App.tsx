@@ -39,7 +39,7 @@ class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
       });
     }
   }
-  handleSubmit = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
+  private async handleSubmit(event: React.FormEvent<HTMLFormElement>): Promise<void> {
     try {
       event.preventDefault();//ページ遷移を防ぐため
       const address = this.state.emailAddress;
