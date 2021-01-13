@@ -16,7 +16,7 @@ getSecretApiKey('sendgrid_api_key').then((result) => {
     if (result != null) {
         sendgrid.setApiKey(result);
     } else {
-        console.error("%s", "SendGrid_API_keyの取得に失敗しました");
+        console.error("SendGrid_API_keyの取得に失敗しました");
     }
 });
 
@@ -25,7 +25,7 @@ getSecretApiKey('send_email_address').then((result) => {
     if (result != null) {
         EnvironmentVariable.fromAddress = result;
     } else {
-        console.error("%s", "emailアドレスの取得に失敗しました");
+        console.error("emailアドレスの取得に失敗しました");
     }
 });
 
@@ -52,7 +52,7 @@ function uploadFileToGCS(upFile: Buffer, onFinish: (fileName: string) => void, o
 async function sendMail(transcription: string, toAddress: string) {
     const bufferText = Buffer.from(transcription);
     if (EnvironmentVariable.fromAddress === "") {
-        console.error("%s", "emailアドレスの取得に失敗しました");
+        console.error("emailアドレスの取得に失敗しました");
         return;
     }
     const msg = {
@@ -117,11 +117,11 @@ async function speechToText(fileName: string, address: string) {
             const trancription = responese.results.map((result) => result.alternatives![0].transcript).join('\n');
             sendMail(trancription, address);
         } else {
-            console.log("文字を検出できませんでした。");
+            console.error("文字を検出できませんでした。");
             sendMail("", address);
         }
     } else {
-        console.log("[err]文字起こしに失敗しました");
+        console.error("[err]文字起こしに失敗しました");
         sendMail("", address);
     }
 
@@ -143,7 +143,7 @@ app.post('/api/', multer().fields([]), (req: express.Request, res: express.Respo
     uploadFileToGCS(decodedFile, (fileName) => {
         speechToText(fileName, req.body.mail)
     }, (err) => {
-        console.log(err);
+        console.error(err);
     });
     res.send("success");
 });
