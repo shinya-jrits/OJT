@@ -1,6 +1,5 @@
 import React from 'react';
 import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg';
-import './App.css';
 import axios from 'axios';
 import { Buffer } from 'buffer';
 
