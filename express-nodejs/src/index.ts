@@ -7,10 +7,18 @@ import { SecretManagerServiceClient } from '@google-cloud/secret-manager'
 import multer from 'multer'
 
 namespace EnvironmentVariable {
-    export const apiKey = getSecretApiKey('sendgrid_api_key');
     export const address = getSecretApiKey('send_email_address');
     export const bucketName = 'meeting_voice_file_jrits';
 }
+
+//SendGridAPIの設定
+getSecretApiKey('sendgrid_api_key').then((result) => {
+    if (result != null) {
+        sendgrid.setApiKey(result);
+    } else {
+        console.log("SendGrid_API_keyの取得に失敗しました");
+    }
+});
 
 function uploadFileToGCS(upFile: Buffer, onFinish: (fileName: string) => void) {
     const fileName = uuidv4() + '.wav';
@@ -33,14 +41,6 @@ function uploadFileToGCS(upFile: Buffer, onFinish: (fileName: string) => void) {
 
 async function sendMail(transcription: string, address: string) {
     try {
-        const apiKey = await EnvironmentVariable.apiKey;
-        if (apiKey != null) {
-            sendgrid.setApiKey(apiKey);
-        } else {
-            console.log("api keyの取得に失敗しました");
-            return;
-        }
-
         const bufferText = Buffer.from(transcription);
         const emailadress = await EnvironmentVariable.address;
         const msg = {
