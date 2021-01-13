@@ -9,12 +9,13 @@ import multer from 'multer'
 namespace EnvironmentVariable {
     export const apiKey = getSecretApiKey('sendgrid_api_key');
     export const address = getSecretApiKey('send_email_address');
+    export const bucketName = 'meeting_voice_file_jrits';
 }
 
-function uploadFileToGCS(upFile: Buffer, address: string) {
+function uploadFileToGCS(upFile: Buffer, onFinish: (fileName: string) => void) {
     const fileName = uuidv4() + '.wav';
     const storage = new Storage();
-    const stream = storage.bucket('meeting_voice_file_jrits').file(fileName).createWriteStream({
+    const stream = storage.bucket(EnvironmentVariable.bucketName).file(fileName).createWriteStream({
         metadata: {
             contentType: 'audio/wav',
         },
@@ -25,8 +26,7 @@ function uploadFileToGCS(upFile: Buffer, address: string) {
     });
     stream.on('finish', () => {
         console.log('<GCS>upload file');
-
-        speechToText("gs://meeting_voice_file_jrits/" + fileName, address);
+        onFinish(fileName);
     });
     stream.end(upFile);
 }
@@ -69,7 +69,7 @@ async function sendMail(transcription: string, address: string) {
 async function getSecretApiKey(secretId: string): Promise<string | null> {
     const client = new SecretManagerServiceClient();
     const [accessResponse] = await client.accessSecretVersion({
-        name: 'projects/972015880934/secrets/' + secretId + '/versions/latest',
+        name: 'projects/483600820879/secrets/' + secretId + '/versions/latest',
     })
     if (accessResponse.payload?.data != null) {
         const responsePayload = accessResponse.payload.data.toString();
@@ -78,7 +78,7 @@ async function getSecretApiKey(secretId: string): Promise<string | null> {
     return null;
 }
 
-async function speechToText(fileUri: string, address: string) {
+async function speechToText(fileName: string, address: string) {
     const client = new Speech.SpeechClient();
 
     const config = {
@@ -86,7 +86,7 @@ async function speechToText(fileUri: string, address: string) {
         enableAutomaticPunctuation: true,
     };
     const audio = {
-        uri: fileUri,
+        uri: 'gs://' + EnvironmentVariable.bucketName + '/' + fileName,
     };
     const request = {
         config: config,
@@ -125,7 +125,9 @@ app.use(function (req, res, next) {
 
 app.post('/api/', multer().fields([]), (req: express.Request, res: express.Response) => {
     const decodedFile = Buffer.from(req.body.file, "base64");
-    uploadFileToGCS(decodedFile, req.body.mail);
+    uploadFileToGCS(decodedFile, (fileName) => {
+        speechToText(fileName, req.body.mail)
+    });
     res.send("success");
 });
 
