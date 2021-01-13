@@ -30,7 +30,7 @@ getSecretApiKey('send_email_address').then((result) => {
 });
 
 
-function uploadFileToGCS(upFile: Buffer, onFinish: (fileName: string) => void) {
+function uploadFileToGCS(upFile: Buffer, onFinish: (fileName: string) => void, onError: (err: Error) => void) {
     const fileName = uuidv4() + '.wav';
     const storage = new Storage();
     const stream = storage.bucket(EnvironmentVariable.bucketName).file(fileName).createWriteStream({
@@ -40,7 +40,7 @@ function uploadFileToGCS(upFile: Buffer, onFinish: (fileName: string) => void) {
         resumable: false
     });
     stream.on('error', (err) => {
-        console.log(err);
+        onError(err);
     });
     stream.on('finish', () => {
         console.log('<GCS>upload file');
@@ -142,6 +142,8 @@ app.post('/api/', multer().fields([]), (req: express.Request, res: express.Respo
     const decodedFile = Buffer.from(req.body.file, "base64");
     uploadFileToGCS(decodedFile, (fileName) => {
         speechToText(fileName, req.body.mail)
+    }, (err) => {
+        console.log(err);
     });
     res.send("success");
 });
