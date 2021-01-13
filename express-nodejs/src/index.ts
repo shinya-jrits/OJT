@@ -50,28 +50,28 @@ function uploadFileToGCS(upFile: Buffer, onFinish: (fileName: string) => void) {
 }
 
 async function sendMail(transcription: string, toAddress: string) {
+    const bufferText = Buffer.from(transcription);
+    if (EnvironmentVariable.fromAddress === "") {
+        console.error("%s", "emailアドレスの取得に失敗しました");
+        return;
+    }
+    const msg = {
+        to: toAddress,
+        from: EnvironmentVariable.fromAddress,
+        subject: '文字起こし結果',
+        text: (transcription.length > 0) ? '文字起こしが完了しました。' + transcription.length + '文字でした。'
+            : '文字起こしに失敗しました',
+        attachments: [
+            {
+                content: bufferText.toString('base64'),
+                filename: 'result.txt',
+                type: 'text/plain',
+                disposition: 'attachment',
+                contentId: 'mytext',
+            }
+        ]
+    }
     try {
-        const bufferText = Buffer.from(transcription);
-        if (EnvironmentVariable.fromAddress === "") {
-            console.error("%s", "emailアドレスの取得に失敗しました");
-            return;
-        }
-        const msg = {
-            to: toAddress,
-            from: EnvironmentVariable.fromAddress,
-            subject: '文字起こし結果',
-            text: (transcription.length > 0) ? '文字起こしが完了しました。' + transcription.length + '文字でした。'
-                : '文字起こしに失敗しました',
-            attachments: [
-                {
-                    content: bufferText.toString('base64'),
-                    filename: 'result.txt',
-                    type: 'text/plain',
-                    disposition: 'attachment',
-                    contentId: 'mytext',
-                }
-            ]
-        }
         await sendgrid.send(msg);
         console.log("send mail success");
     } catch (err) {
