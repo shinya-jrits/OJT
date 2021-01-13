@@ -68,6 +68,8 @@ class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
         <form onSubmit={this.handleSubmit}>
           <label>
             <p>メールアドレス:<input type="email" minLength={1} name="mail" onChange={this.handleChange} /></p>
+          </label>
+          <label>
             <p>ファイル:<input type="file" accept="video/mp4" onChange={this.handleChange} /></p>
           </label>
           <input type="submit" value="Submit" />
