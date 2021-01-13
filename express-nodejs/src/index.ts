@@ -7,7 +7,7 @@ import { SecretManagerServiceClient } from '@google-cloud/secret-manager'
 import multer from 'multer'
 
 namespace EnvironmentVariable {
-    export const address = getSecretApiKey('send_email_address');
+    export let fromAddress: string = "";
     export const bucketName = 'meeting_voice_file_jrits';
 }
 
@@ -16,9 +16,19 @@ getSecretApiKey('sendgrid_api_key').then((result) => {
     if (result != null) {
         sendgrid.setApiKey(result);
     } else {
-        console.log("SendGrid_API_keyの取得に失敗しました");
+        console.error("%s", "SendGrid_API_keyの取得に失敗しました");
     }
 });
+
+//emailアドレスの設定
+getSecretApiKey('send_email_address').then((result) => {
+    if (result != null) {
+        EnvironmentVariable.fromAddress = result;
+    } else {
+        console.error("%s", "emailアドレスの取得に失敗しました");
+    }
+});
+
 
 function uploadFileToGCS(upFile: Buffer, onFinish: (fileName: string) => void) {
     const fileName = uuidv4() + '.wav';
@@ -39,13 +49,16 @@ function uploadFileToGCS(upFile: Buffer, onFinish: (fileName: string) => void) {
     stream.end(upFile);
 }
 
-async function sendMail(transcription: string, address: string) {
+async function sendMail(transcription: string, toAddress: string) {
     try {
         const bufferText = Buffer.from(transcription);
-        const emailadress = await EnvironmentVariable.address;
+        if (EnvironmentVariable.fromAddress === "") {
+            console.error("%s", "emailアドレスの取得に失敗しました");
+            return;
+        }
         const msg = {
-            to: address,
-            from: (emailadress != null) ? emailadress : "",
+            to: toAddress,
+            from: EnvironmentVariable.fromAddress,
             subject: '文字起こし結果',
             text: (transcription.length > 0) ? '文字起こしが完了しました。' + transcription.length + '文字でした。'
                 : '文字起こしに失敗しました',
