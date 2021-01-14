@@ -49,8 +49,7 @@ function uploadFileToGCS(upFile: Buffer, onFinish: (fileName: string) => void, o
     stream.end(upFile);
 }
 
-async function sendMail(transcription: string, toAddress: string, mailText: string) {
-    const bufferText = Buffer.from(transcription);
+async function sendMail(transcript: string, toAddress: string, mailText: string) {
     if (EnvironmentVariable.fromAddress === "") {
         console.error("emailアドレスの取得に失敗しました");
         return;
@@ -60,15 +59,15 @@ async function sendMail(transcription: string, toAddress: string, mailText: stri
         from: EnvironmentVariable.fromAddress,
         subject: '文字起こし結果',
         text: mailText,
-        attachments: [
+        attachments: (transcript != "") ? [
             {
-                content: bufferText.toString('base64'),
+                content: Buffer.from(transcript).toString('base64'),
                 filename: 'result.txt',
                 type: 'text/plain',
                 disposition: 'attachment',
                 contentId: 'mytext',
             }
-        ]
+        ] : []
     }
     try {
         await sendgrid.send(msg);
@@ -113,8 +112,8 @@ async function speechToText(fileName: string, address: string) {
 
     if (responese.results != null) {
         if (responese.results[0].alternatives != null) {
-            const trancription = responese.results.map((result) => result.alternatives![0].transcript).join('\n');
-            sendMail(trancription, address, "文字起こしが完了しました。");
+            const transcript = responese.results.map((result) => result.alternatives![0].transcript).join('\n');
+            sendMail(transcript, address, "文字起こしが完了しました。");
         } else {
             console.error("文字を検出できませんでした。");
             sendMail("", address, "文字を検出できませんでした");
