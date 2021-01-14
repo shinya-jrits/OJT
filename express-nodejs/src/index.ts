@@ -115,12 +115,12 @@ async function speechToText(fileName: string, address: string) {
             const transcript = responese.results.map((result) => result.alternatives![0].transcript).join('\n');
             sendMail(transcript, address, "文字起こしが完了しました。");
         } else {
-            console.error("文字を検出できませんでした。");
-            sendMail("", address, "文字を検出できませんでした");
+            console.log("文字を検出できませんでした。");
+            sendMail("", address, "文字を検出できませんでした。");
         }
     } else {
-        console.error("[err]文字起こしに失敗しました");
-        sendMail("", address, "文字起こしに失敗しました");
+        console.error("文字起こしに失敗しました");
+        sendMail("", address, "文字起こしに失敗しました。");
     }
 
 }
