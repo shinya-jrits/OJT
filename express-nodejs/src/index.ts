@@ -49,7 +49,7 @@ function uploadFileToGCS(upFile: Buffer, onFinish: (fileName: string) => void, o
     stream.end(upFile);
 }
 
-async function sendMail(transcription: string, toAddress: string) {
+async function sendMail(transcription: string, toAddress: string, mailText: string) {
     const bufferText = Buffer.from(transcription);
     if (EnvironmentVariable.fromAddress === "") {
         console.error("emailアドレスの取得に失敗しました");
@@ -59,8 +59,7 @@ async function sendMail(transcription: string, toAddress: string) {
         to: toAddress,
         from: EnvironmentVariable.fromAddress,
         subject: '文字起こし結果',
-        text: (transcription.length > 0) ? '文字起こしが完了しました。' + transcription.length + '文字でした。'
-            : '文字起こしに失敗しました',
+        text: mailText,
         attachments: [
             {
                 content: bufferText.toString('base64'),
@@ -115,14 +114,14 @@ async function speechToText(fileName: string, address: string) {
     if (responese.results != null) {
         if (responese.results[0].alternatives != null) {
             const trancription = responese.results.map((result) => result.alternatives![0].transcript).join('\n');
-            sendMail(trancription, address);
+            sendMail(trancription, address, "文字起こしが完了しました。");
         } else {
             console.error("文字を検出できませんでした。");
-            sendMail("", address);
+            sendMail("", address, "文字を検出できませんでした");
         }
     } else {
         console.error("[err]文字起こしに失敗しました");
-        sendMail("", address);
+        sendMail("", address, "文字起こしに失敗しました");
     }
 
 }
