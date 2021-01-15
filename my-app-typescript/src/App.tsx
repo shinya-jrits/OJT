@@ -44,7 +44,7 @@ class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
       event.preventDefault();//ページ遷移を防ぐため
       const address = this.state.emailAddress;
       if (address == null || address === "") {
-        window.alert("メールアドレスを入力してください")
+        window.alert("メールアドレスを入力してください");
         return;
       }
       const audioFile = await this.convertVideoToAudio(this.state.videoFile);
