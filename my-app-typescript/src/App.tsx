@@ -9,12 +9,6 @@ interface convertVideoToAudioStateInterface {
 }
 
 class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
-  constructor(props: {}) {
-    super(props);
-    this.handleChange = this.handleChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
-  }
-
   private async convertVideoToAudio(videoFile: File): Promise<File> {
     const ffmpeg = createFFmpeg({
       log: true,
@@ -25,13 +19,14 @@ class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
     await ffmpeg.run('-i', videoFile.name, 'audio.wav');
     return ffmpeg.FS('readFile', 'audio.wav');
   }
-  private handleChange(event: React.ChangeEvent<HTMLInputElement>) {
+
+  handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files != null && event.target.files.length === 1) {
       this.setState({
         videoFile: event.target.files[0],
       });
-
     }
+
     if (event.target.type === 'email') {
       console.log(event.target.value);
       this.setState({
@@ -39,7 +34,8 @@ class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
       });
     }
   }
-  private async handleSubmit(event: React.FormEvent<HTMLFormElement>): Promise<void> {
+
+  handleSubmit = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
     try {
       event.preventDefault();//ページ遷移を防ぐため
       const address = this.state.emailAddress;
