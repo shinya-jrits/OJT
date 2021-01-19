@@ -12,7 +12,7 @@ namespace EnvironmentVariable {
 }
 
 //SendGridAPIの設定
-getSecretApiKey('sendgrid_api_key').then((result) => {
+getSecretManagerValue('sendgrid_api_key').then((result) => {
     if (result != null) {
         sendgrid.setApiKey(result);
     } else {
@@ -21,7 +21,7 @@ getSecretApiKey('sendgrid_api_key').then((result) => {
 });
 
 //emailアドレスの設定
-getSecretApiKey('send_email_address').then((result) => {
+getSecretManagerValue('send_email_address').then((result) => {
     if (result != null) {
         EnvironmentVariable.fromAddress = result;
     } else {
@@ -79,7 +79,7 @@ async function sendMail(transcription: string, toAddress: string) {
     }
 }
 
-async function getSecretApiKey(secretId: string): Promise<string | null> {
+async function getSecretManagerValue(secretId: string): Promise<string | null> {
     const client = new SecretManagerServiceClient();
     const [accessResponse] = await client.accessSecretVersion({
         name: 'projects/483600820879/secrets/' + secretId + '/versions/latest',
