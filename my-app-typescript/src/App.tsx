@@ -32,7 +32,7 @@ class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
     return ffmpeg.FS('readFile', 'audio.wav');
   }
 
-  handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  handleChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
     assertCheckFileListSingle(event.target.files);
     this.setState({
       videoFile: event.target.files[0],
