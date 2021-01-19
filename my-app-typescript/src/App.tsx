@@ -8,6 +8,18 @@ interface convertVideoToAudioStateInterface {
   emailAddress: string;
 }
 
+function assertFilesDefine(files: FileList | null): asserts files is NonNullable<FileList> {
+  if (files === undefined || files === null) {
+    throw new Error(
+      `filesが不正な値です,${files}でした`
+    );
+  } else if (files.length !== 1) {
+    throw new Error(
+      `files.lengthが不正な値です,${files.length}でした`
+    );
+  }
+}
+
 class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
   private async convertVideoToAudio(videoFile: File): Promise<File> {
     const ffmpeg = createFFmpeg({
@@ -21,11 +33,11 @@ class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
   }
 
   handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files != null && event.target.files.length === 1) {
-      this.setState({
-        videoFile: event.target.files[0],
-      });
-    }
+    assertFilesDefine(event.target.files);
+    this.setState({
+      videoFile: event.target.files[0],
+    });
+
 
     if (event.target.type === 'email') {
       console.log(event.target.value);
