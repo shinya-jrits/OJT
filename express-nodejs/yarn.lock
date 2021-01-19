@@ -72,6 +72,13 @@
   resolved "https://registry.yarnpkg.com/@google-cloud/promisify/-/promisify-2.0.3.tgz#f934b5cdc939e3c7039ff62b9caaf59a9d89e3a8"
   integrity sha512-d4VSA86eL/AFTe5xtyZX+ePUjE8dIFu2T8zmdeNBSa5/kNgXPCx/o/wbFNHAGLJdGnk1vddRuMESD9HbOC8irw==
 
+"@google-cloud/secret-manager@^3.2.3":
+  version "3.3.0"
+  resolved "https://registry.yarnpkg.com/@google-cloud/secret-manager/-/secret-manager-3.3.0.tgz#a134705e97998458b4e74096b6a9e2cf24b661ce"
+  integrity sha512-v4N4Kj+TpSboHxHyOuqk28wTAx79Nj5rUlvU+ySzE5+cgkAILMbM0e+QkjkvXWzwP41q7rAUM1cccQ2z9qtolg==
+  dependencies:
+    google-gax "^2.9.2"
+
 "@google-cloud/speech@^4.1.5":
   version "4.1.5"
   resolved "https://registry.yarnpkg.com/@google-cloud/speech/-/speech-4.1.5.tgz#4803198b7fe09e60ea856a2a75917c9b31255ad5"
@@ -702,9 +709,9 @@ currently-unhandled@^0.4.1:
     array-find-index "^1.0.1"
 
 date-and-time@^0.14.0:
-  version "0.14.1"
-  resolved "https://registry.yarnpkg.com/date-and-time/-/date-and-time-0.14.1.tgz#969634697b78956fb66b8be6fb0f39fbd631f2f6"
-  integrity sha512-M4RggEH5OF2ZuCOxgOU67R6Z9ohjKbxGvAQz48vj53wLmL0bAgumkBvycR32f30pK+Og9pIR+RFDyChbaE4oLA==
+  version "0.14.2"
+  resolved "https://registry.yarnpkg.com/date-and-time/-/date-and-time-0.14.2.tgz#a4266c3dead460f6c231fe9674e585908dac354e"
+  integrity sha512-EFTCh9zRSEpGPmJaexg7HTuzZHh6cnJj1ui7IGCFNXzd2QdpsNh05Db5TF3xzJm30YN+A8/6xHSuRcQqoc3kFA==
 
 dateformat@~1.0.4-1.2.3:
   version "1.0.12"
@@ -2447,7 +2454,7 @@ ts-node-dev@^1.0.0:
     ts-node "^9.0.0"
     tsconfig "^7.0.0"
 
-ts-node@^9.0.0:
+ts-node@^9.0.0, ts-node@^9.1.1:
   version "9.1.1"
   resolved "https://registry.yarnpkg.com/ts-node/-/ts-node-9.1.1.tgz#51a9a450a3e959401bda5f004a72d54b936d376d"
   integrity sha512-hPlt7ZACERQGf03M253ytLY3dHbGNGrAq9qIHWUY9XHYl1z7wYngSr3OQ5xmui8o2AaxsONxIzjafLUiWBo1Fg==
