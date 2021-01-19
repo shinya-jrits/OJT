@@ -8,7 +8,7 @@ interface convertVideoToAudioStateInterface {
   emailAddress: string;
 }
 
-function assertCheckFileListSingle(files: FileList | null): asserts files is NonNullable<FileList> {
+function assertIsSingle(files: FileList | null): asserts files is NonNullable<FileList> {
   if (files === undefined || files === null) {
     throw new Error(
       `filesが不正な値です,${files}でした`
@@ -33,7 +33,7 @@ class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
   }
 
   handleChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
-    assertCheckFileListSingle(event.target.files);
+    assertIsSingle(event.target.files);
     this.setState({
       videoFile: event.target.files[0],
     });
