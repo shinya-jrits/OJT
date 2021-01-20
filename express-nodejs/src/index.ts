@@ -49,7 +49,7 @@ function uploadFileToGCS(upFile: Buffer, onFinish: (fileName: string) => void, o
     stream.end(upFile);
 }
 
-async function sendMail(transcript: string, toAddress: string, mailText: string) {
+async function sendMail(transcript: string | null, toAddress: string, mailText: string) {
     if (EnvironmentVariable.fromAddress === "") {
         console.error("emailアドレスの取得に失敗しました");
         return;
@@ -59,15 +59,18 @@ async function sendMail(transcript: string, toAddress: string, mailText: string)
         from: EnvironmentVariable.fromAddress,
         subject: '文字起こし結果',
         text: mailText,
-        attachments: (transcript != "") ? [
-            {
-                content: Buffer.from(transcript).toString('base64'),
-                filename: 'result.txt',
-                type: 'text/plain',
-                disposition: 'attachment',
-                contentId: 'mytext',
-            }
-        ] : []
+        attachments:
+            (transcript == null)
+                ? []
+                : [
+                    {
+                        content: Buffer.from(transcript).toString('base64'),
+                        filename: 'result.txt',
+                        type: 'text/plain',
+                        disposition: 'attachment',
+                        contentId: 'mytext',
+                    }
+                ]
     }
     try {
         await sendgrid.send(msg);
@@ -141,16 +144,16 @@ app.post('/api/', multer().fields([]), (req: express.Request, res: express.Respo
     uploadFileToGCS(decodedFile, (fileName) => {
         speechToText(fileName).then((result) => {
             if (result === null) {
-                sendMail("", req.body.mail, "文字起こしに失敗しました。");
+                sendMail(null, req.body.mail, "文字起こしに失敗しました。");
             } else if (result === "") {
-                sendMail("", req.body.mail, "文字を検出できませんでした。");
+                sendMail(null, req.body.mail, "文字を検出できませんでした。");
             } else {
                 sendMail(result, req.body.mail, "文字起こしが完了しました。添付ファイルをご確認ください。");
             }
         })
     }, (err) => {
         console.error(err);
-        sendMail("", req.body.mail, "文字起こしに失敗しました。");
+        sendMail(null, req.body.mail, "文字起こしに失敗しました。");
     });
     res.send("success");
 });
