@@ -154,6 +154,4 @@ app.post('/api/', multer().fields([]), (req: express.Request, res: express.Respo
     res.send("success");
 });
 
-app.listen(4000, () => {
-    console.log('example app listening on port 4000!')
-});
+app.listen(process.env.PORT || 8080, () => { console.log('example app listening on port 8080!') });
