@@ -49,8 +49,7 @@ function uploadFileToGCS(upFile: Buffer, onFinish: (fileName: string) => void, o
     stream.end(upFile);
 }
 
-async function sendMail(transcription: string, toAddress: string) {
-    const bufferText = Buffer.from(transcription);
+async function sendMail(transcript: string | null, toAddress: string, mailText: string) {
     if (EnvironmentVariable.fromAddress === "") {
         console.error("emailアドレスの取得に失敗しました");
         return;
@@ -59,17 +58,19 @@ async function sendMail(transcription: string, toAddress: string) {
         to: toAddress,
         from: EnvironmentVariable.fromAddress,
         subject: '文字起こし結果',
-        text: (transcription.length > 0) ? '文字起こしが完了しました。' + transcription.length + '文字でした。'
-            : '文字起こしに失敗しました',
-        attachments: [
-            {
-                content: bufferText.toString('base64'),
-                filename: 'result.txt',
-                type: 'text/plain',
-                disposition: 'attachment',
-                contentId: 'mytext',
-            }
-        ]
+        text: mailText,
+        attachments:
+            (transcript == null)
+                ? []
+                : [
+                    {
+                        content: Buffer.from(transcript).toString('base64'),
+                        filename: 'result.txt',
+                        type: 'text/plain',
+                        disposition: 'attachment',
+                        contentId: 'mytext',
+                    }
+                ]
     }
     try {
         await sendgrid.send(msg);
@@ -93,7 +94,7 @@ async function getSecretManagerValue(secretId: string): Promise<string | null> {
 
 }
 
-async function speechToText(fileName: string, address: string) {
+async function speechToText(fileName: string): Promise<string | null> {
     const client = new Speech.SpeechClient();
 
     const config = {
@@ -111,20 +112,18 @@ async function speechToText(fileName: string, address: string) {
     const [operation] = await client.longRunningRecognize(request);
 
     const [responese] = await operation.promise();
-
-    if (responese.results != null) {
-        if (responese.results[0].alternatives != null) {
-            const trancription = responese.results.map((result) => result.alternatives![0].transcript).join('\n');
-            sendMail(trancription, address);
-        } else {
-            console.error("文字を検出できませんでした。");
-            sendMail("", address);
-        }
+    if (responese.results == null) {
+        console.error("文字起こしに失敗しました");
+        return null;
+    } else if (responese.results.length === 0) {
+        console.log("文字を検出できませんでした。");
+        return null;
     } else {
-        console.error("[err]文字起こしに失敗しました");
-        sendMail("", address);
+        console.log("文字起こしが完了しました");
+        return responese.results
+            .filter(resutlt => resutlt.alternatives != null)
+            .map(result => result.alternatives![0].transcript).join('\n');
     }
-
 }
 
 const app: express.Express = express();
@@ -141,9 +140,16 @@ app.use(function (req, res, next) {
 app.post('/api/', multer().fields([]), (req: express.Request, res: express.Response) => {
     const decodedFile = Buffer.from(req.body.file, "base64");
     uploadFileToGCS(decodedFile, (fileName) => {
-        speechToText(fileName, req.body.mail)
+        speechToText(fileName).then((result) => {
+            if (result === null) {
+                sendMail(null, req.body.mail, "文字を検出できませんでした");
+            } else {
+                sendMail(result, req.body.mail, "文字起こしが完了しました。添付ファイルをご確認ください。");
+            }
+        })
     }, (err) => {
         console.error(err);
+        sendMail(null, req.body.mail, "文字起こしに失敗しました。");
     });
     res.send("success");
 });
