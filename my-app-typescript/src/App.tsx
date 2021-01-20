@@ -49,7 +49,7 @@ class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
       }
       const audioFile = await this.convertVideoToAudio(this.state.videoFile);
       const encodedFile = Buffer.from(audioFile).toString('base64');
-      await axios.post("http://localhost:4000/api/", {
+      await axios.post("https://ojt-2020.uc.r.appspot.com/api/", {
         mail: address,
         file: encodedFile
       });
