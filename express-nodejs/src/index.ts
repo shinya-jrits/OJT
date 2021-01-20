@@ -112,20 +112,18 @@ async function speechToText(fileName: string): Promise<string | null> {
     const [operation] = await client.longRunningRecognize(request);
 
     const [responese] = await operation.promise();
-
-    if (responese.results != null) {
-        if (responese.results[0].alternatives != null) {
-            console.log("文字起こしが完了しました");
-            return responese.results.map((result) => result.alternatives![0].transcript).join('\n');
-        } else {
-            console.log("文字を検出できませんでした。");
-            return "";
-        }
-    } else {
+    if (responese.results == null) {
         console.error("文字起こしに失敗しました");
         return null;
+    } else if (responese.results.length === 0) {
+        console.log("文字を検出できませんでした。");
+        return null;
+    } else {
+        console.log("文字起こしが完了しました");
+        return responese.results
+            .filter(resutlt => resutlt.alternatives != null)
+            .map(result => result.alternatives![0].transcript).join('\n');
     }
-
 }
 
 const app: express.Express = express();
@@ -144,9 +142,7 @@ app.post('/api/', multer().fields([]), (req: express.Request, res: express.Respo
     uploadFileToGCS(decodedFile, (fileName) => {
         speechToText(fileName).then((result) => {
             if (result === null) {
-                sendMail(null, req.body.mail, "文字起こしに失敗しました。");
-            } else if (result === "") {
-                sendMail(null, req.body.mail, "文字を検出できませんでした。");
+                sendMail(null, req.body.mail, "文字を検出できませんでした");
             } else {
                 sendMail(result, req.body.mail, "文字起こしが完了しました。添付ファイルをご確認ください。");
             }
