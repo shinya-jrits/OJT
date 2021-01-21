@@ -28,7 +28,7 @@ class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
     await ffmpeg.load();
     const fetchedFile = await fetchFile(videoFile);
     ffmpeg.FS('writeFile', videoFile.name, fetchedFile);
-    await ffmpeg.run('-i', videoFile.name, '-ac', '1', 'audio.wav');
+    await ffmpeg.run('-i', videoFile.name, '-ac', '1', '-ab', '54k', 'audio.mp3');
     return ffmpeg.FS('readFile', 'audio.wav');
   }
 
