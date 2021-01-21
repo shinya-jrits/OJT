@@ -95,8 +95,7 @@ async function getSecretManagerValue(secretId: string): Promise<string | null> {
 }
 
 async function speechToText(fileName: string): Promise<string | null> {
-    const client = new Speech.SpeechClient();
-
+    const client = new Speech.v1p1beta1.SpeechClient();
     const config = {
         languageCode: 'ja-JP',
         enableAutomaticPunctuation: true,
