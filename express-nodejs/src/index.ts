@@ -127,8 +127,8 @@ async function speechToText(fileName: string): Promise<string | null> {
 
 const app: express.Express = express();
 
-//1時間あたり100mb程度なので2~3時間程度でbase64でファイルサイズが大きくなる(1.4倍)ことを予想する
-app.use(express.json({ limit: '420mb', type: 'application/*+json' }));
+//GAEの容量制限に合わせて
+app.use(express.json({ limit: '32mb', type: 'application/*+json' }));
 app.use(express.urlencoded({
     extended: false,
     type: 'application/x-www-form-urlencoded'
