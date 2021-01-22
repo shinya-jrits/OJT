@@ -50,25 +50,32 @@ class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
   }
 
   handleSubmit = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
-    try {
-      event.preventDefault();//ページ遷移を防ぐため
-      const address = this.state.emailAddress;
-      if (address == null || address === "") {
-        window.alert("メールアドレスを入力してください");
-        return;
-      }
-      const audioFile = await this.convertVideoToAudio(this.state.videoFile);
-      const encodedFile = Buffer.from(audioFile).toString('base64');
-      await axios.post("http://localhost:4000/api/", {
-        mail: address,
-        file: encodedFile
-      });
-      console.log("post request success");
-      window.alert("送信に成功しました");
-    } catch (error) {
-      console.log(console.error);
-      window.alert("送信に失敗しました");
+    event.preventDefault();//ページ遷移を防ぐため
+    const address = this.state.emailAddress;
+    if (address == null || address === "") {
+      window.alert("メールアドレスを入力してください");
+      return;
     }
+    const audioFile = await this.convertVideoToAudio(this.state.videoFile);
+    const params = new FormData();
+    params.append('text', address);
+    params.append('file', audioFile);
+    //const encodedFile = Buffer.from(audioFile).toString('base64');
+    await axios.post("http://localhost:4000/api/", params,
+      {
+        headers: {
+          'content-type': 'multipart/form-data',
+        },
+      })
+      .then(() => {
+        console.log("post request success");
+        window.alert("送信に成功しました");
+      })
+      .catch((error) => {
+        console.log(error);
+        window.alert("送信に失敗しました");
+      })
+
   }
 
   render() {
