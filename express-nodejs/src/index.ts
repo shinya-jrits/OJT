@@ -31,11 +31,11 @@ getSecretManagerValue('send_email_address').then((result) => {
 
 
 function uploadFileToGCS(upFile: Buffer, onFinish: (fileName: string) => void, onError: (err: Error) => void) {
-    const fileName = uuidv4() + '.wav';
+    const fileName = uuidv4() + '.mp3';
     const storage = new Storage();
     const stream = storage.bucket(EnvironmentVariable.bucketName).file(fileName).createWriteStream({
         metadata: {
-            contentType: 'audio/wav',
+            contentType: 'audio/mp3',
         },
         resumable: false
     });
