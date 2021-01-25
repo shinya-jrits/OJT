@@ -29,8 +29,7 @@ getSecretManagerValue('send_email_address').then((result) => {
     }
 });
 
-
-function uploadFileToGCS(upFile: File, onFinish: (fileName: string) => void, onError: (err: Error) => void) {
+function uploadFileToGCS(upFile: Buffer, onFinish: (fileName: string) => void, onError: (err: Error) => void) {
     const fileName = uuidv4() + '.mp3';
     const storage = new Storage();
     const stream = storage.bucket(EnvironmentVariable.bucketName).file(fileName).createWriteStream({
@@ -127,21 +126,15 @@ async function speechToText(fileName: string): Promise<string | null> {
 
 const app: express.Express = express();
 
-//GAEの容量制限に合わせて
-app.use(express.json({ limit: '32mb', type: 'application/*+json' }));
-app.use(express.urlencoded({
-    extended: false,
-    type: 'application/x-www-form-urlencoded'
-}))
-
 app.use(function (req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     next();
 })
-const upload = multer({ dest: 'uploads/' });
+
+const upload = multer({ storage: multer.memoryStorage() });
 app.post('/api/', upload.single('file'), (req: express.Request, res: express.Response) => {
-    uploadFileToGCS(req.body.file, (fileName) => {
+    uploadFileToGCS(req.file.buffer, (fileName) => {
         speechToText(fileName).then((result) => {
             if (result === null) {
                 sendMail(null, req.body.text, "文字を検出できませんでした");
