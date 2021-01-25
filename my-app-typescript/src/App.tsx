@@ -1,7 +1,6 @@
 import React from 'react';
 import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg';
 import axios from 'axios';
-import { Buffer } from 'buffer';
 
 interface convertVideoToAudioStateInterface {
   videoFile: File;
@@ -21,7 +20,7 @@ function assertIsSingle(files: FileList | null): asserts files is NonNullable<Fi
 }
 
 class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
-  private async convertVideoToAudio(videoFile: File): Promise<File> {
+  private async convertVideoToAudio(videoFile: File): Promise<Blob> {
     const ffmpeg = createFFmpeg({
       log: true,
     });
@@ -29,7 +28,11 @@ class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
     const fetchedFile = await fetchFile(videoFile);
     ffmpeg.FS('writeFile', videoFile.name, fetchedFile);
     await ffmpeg.run('-i', videoFile.name, '-ac', '1', '-ab', '54k', 'audio.mp3');
-    return ffmpeg.FS('readFile', 'audio.mp3');
+    const resultFile = ffmpeg.FS('readFile', 'audio.mp3');
+    const resultBlob = new Blob([resultFile.buffer], {
+      type: 'audio/mp3'
+    });
+    return resultBlob;
   }
 
   handleChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
@@ -57,16 +60,15 @@ class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
       return;
     }
     const audioFile = await this.convertVideoToAudio(this.state.videoFile);
-    const params = new FormData();
-    params.append('text', address);
-    params.append('file', audioFile);
-    //const encodedFile = Buffer.from(audioFile).toString('base64');
-    await axios.post("http://localhost:4000/api/", params,
-      {
-        headers: {
-          'content-type': 'multipart/form-data',
-        },
-      })
+    const formData = new FormData();
+    formData.append('text', address);
+    formData.append('file', audioFile);
+
+    await axios.post("https://ojt-2020.uc.r.appspot.com/api/", formData, {
+      headers: {
+        'content-type': 'multipart/form-data'
+      }
+    })
       .then(() => {
         console.log("post request success");
         window.alert("送信に成功しました");
