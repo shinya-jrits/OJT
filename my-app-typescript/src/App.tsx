@@ -40,9 +40,9 @@ class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
         this.setState({
           buttonText: '送信',
           buttonDisabled: false
-        })
+        });
       }
-    })
+    });
     await ffmpeg.load();
     const fetchedFile = await fetchFile(videoFile);
     ffmpeg.FS('writeFile', videoFile.name, fetchedFile);
