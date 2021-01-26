@@ -14,7 +14,7 @@ function assertIsSingle(files: FileList | null): asserts files is NonNullable<Fi
     throw new Error(
       `filesが不正な値です,${files}でした`
     );
-  } else if (files.length !== 1) {
+  } else if (files.length > 1) {
     throw new Error(
       `files.lengthが不正な値です,${files.length}でした`
     );
