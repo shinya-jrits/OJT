@@ -28,15 +28,17 @@ class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
     await ffmpeg.load();
     const fetchedFile = await fetchFile(videoFile);
     ffmpeg.FS('writeFile', videoFile.name, fetchedFile);
-    await ffmpeg.run('-i', videoFile.name, '-ac', '1', 'audio.wav');
-    return ffmpeg.FS('readFile', 'audio.wav');
+    await ffmpeg.run('-i', videoFile.name, '-ac', '1', '-ab', '54k', 'audio.mp3');
+    return ffmpeg.FS('readFile', 'audio.mp3');
   }
 
   handleChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
-    assertIsSingle(event.target.files);
-    this.setState({
-      videoFile: event.target.files[0],
-    });
+    if (event.target.files != null) {
+      assertIsSingle(event.target.files);
+      this.setState({
+        videoFile: event.target.files[0],
+      });
+    }
 
 
     if (event.target.type === 'email') {
