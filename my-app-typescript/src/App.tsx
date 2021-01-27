@@ -4,7 +4,7 @@ import axios from 'axios';
 
 interface convertVideoToAudioStateInterface {
   videoFile: File | undefined;
-  emailAddress: string;
+  emailAddress: string | undefined;
   buttonText: string;
   buttonDisabled: boolean;
 }
@@ -24,7 +24,7 @@ function assertIsSingle(files: FileList | null): asserts files is NonNullable<Fi
 class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
   constructor() {
     super({});
-    this.state = { videoFile: undefined, emailAddress: '', buttonText: '送信', buttonDisabled: false };
+    this.state = { videoFile: undefined, emailAddress: undefined, buttonText: '送信', buttonDisabled: false };
   }
   private async convertVideoToAudio(videoFile: File): Promise<Blob> {
     const ffmpeg = createFFmpeg({
