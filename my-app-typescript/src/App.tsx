@@ -10,7 +10,7 @@ interface convertVideoToAudioStateInterface {
 }
 
 function assertIsSingle(files: FileList | null): asserts files is NonNullable<FileList> {
-  if (files === undefined || files === null) {
+  if (files == null) {
     throw new Error(
       `filesが不正な値です,${files}でした`
     );
@@ -133,4 +133,3 @@ class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
 }
 
 export default MovieForm;
-
