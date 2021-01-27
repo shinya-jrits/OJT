@@ -6,7 +6,7 @@ interface convertVideoToAudioStateInterface {
   videoFile: File | undefined;
   emailAddress: string | undefined;
   buttonText: string;
-  buttonDisabled: boolean;
+  isProcessing: boolean;
 }
 
 function assertIsSingle(files: FileList | null): asserts files is NonNullable<FileList> {
@@ -24,7 +24,7 @@ function assertIsSingle(files: FileList | null): asserts files is NonNullable<Fi
 class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
   constructor() {
     super({});
-    this.state = { videoFile: undefined, emailAddress: undefined, buttonText: '送信', buttonDisabled: false };
+    this.state = { videoFile: undefined, emailAddress: undefined, buttonText: '送信', isProcessing: false };
   }
   private async convertVideoToAudio(videoFile: File): Promise<Blob> {
     const ffmpeg = createFFmpeg({
@@ -34,12 +34,12 @@ class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
       if (ratio < 1) {
         this.setState({
           buttonText: Math.round(100 * ratio) + '%',
-          buttonDisabled: true
+          isProcessing: true
         });
       } else {
         this.setState({
           buttonText: '送信',
-          buttonDisabled: false
+          isProcessing: false
         });
       }
     });
@@ -125,7 +125,7 @@ class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
           <p>
             <label>ファイル:<input type="file" accept="video/mp4" onChange={this.handleChange} /></label>
           </p>
-          <input type="submit" value={this.state.buttonText} disabled={this.state.buttonDisabled} />
+          <input type="submit" value={this.state.buttonText} disabled={this.state.isProcessing} />
         </form>
       </div>
     );
