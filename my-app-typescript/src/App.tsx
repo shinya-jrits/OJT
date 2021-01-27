@@ -73,8 +73,7 @@ class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
 
   handleSubmit = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();//ページ遷移を防ぐため
-    const address = this.state.emailAddress;
-    if (address == null || address === "") {
+    if (this.state.emailAddress == null || this.state.emailAddress === "") {
       window.alert("メールアドレスを入力してください");
       return;
     }
@@ -82,12 +81,25 @@ class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
       window.alert("ファイルを選択してください");
       return;
     }
-    const audioFile = await this.convertVideoToAudio(this.state.videoFile);
     const formData = new FormData();
-    formData.append('text', address);
-    formData.append('file', audioFile);
+    formData.append('text', this.state.emailAddress);
+    try {
+      const audioFile = await this.convertVideoToAudio(this.state.videoFile);
+      formData.append('file', audioFile);
+    } catch (error) {
+      window.alert('ファイルの変換に失敗しました');
+      console.error(error);
+      return;
+    }
 
-    await axios.post("http://localhost/api/", formData, {
+    const postUrl = process.env.REACT_APP_POST_URL;
+    if (postUrl == null) {
+      console.error("POST先のURLが指定されていません");
+      window.alert("送信に失敗しました");
+      return;
+    }
+
+    axios.post(postUrl, formData, {
       headers: {
         'content-type': 'multipart/form-data'
       }
@@ -99,7 +111,7 @@ class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
       .catch((error) => {
         console.log(error);
         window.alert("送信に失敗しました");
-      })
+      });
 
   }
 
