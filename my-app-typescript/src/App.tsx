@@ -70,7 +70,14 @@ class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
       return;
     }
 
-    axios.post("https://ojt-2020.uc.r.appspot.com/api/", formData, {
+    const postUrl = process.env.REACT_APP_POST_URL;
+    if (postUrl == null) {
+      console.error("POST先のURLが指定されていません");
+      window.alert("送信に失敗しました");
+      return;
+    }
+
+    axios.post(postUrl, formData, {
       headers: {
         'content-type': 'multipart/form-data'
       }
