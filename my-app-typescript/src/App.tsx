@@ -1,7 +1,6 @@
 import React from 'react';
 import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg';
 import axios from 'axios';
-import { Buffer } from 'buffer';
 
 interface convertVideoToAudioStateInterface {
   videoFile: File;
@@ -21,7 +20,7 @@ function assertIsSingle(files: FileList | null): asserts files is NonNullable<Fi
 }
 
 class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
-  private async convertVideoToAudio(videoFile: File): Promise<File> {
+  private async convertVideoToAudio(videoFile: File): Promise<Blob> {
     const ffmpeg = createFFmpeg({
       log: true,
     });
@@ -29,7 +28,11 @@ class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
     const fetchedFile = await fetchFile(videoFile);
     ffmpeg.FS('writeFile', videoFile.name, fetchedFile);
     await ffmpeg.run('-i', videoFile.name, '-ac', '1', '-ab', '54k', 'audio.mp3');
-    return ffmpeg.FS('readFile', 'audio.mp3');
+    const resultFile = ffmpeg.FS('readFile', 'audio.mp3');
+    const resultBlob = new Blob([resultFile.buffer], {
+      type: 'audio/mp3'
+    });
+    return resultBlob;
   }
 
   handleChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
@@ -50,25 +53,44 @@ class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
   }
 
   handleSubmit = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
-    try {
-      event.preventDefault();//ページ遷移を防ぐため
-      const address = this.state.emailAddress;
-      if (address == null || address === "") {
-        window.alert("メールアドレスを入力してください");
-        return;
-      }
-      const audioFile = await this.convertVideoToAudio(this.state.videoFile);
-      const encodedFile = Buffer.from(audioFile).toString('base64');
-      await axios.post("http://localhost:4000/api/", {
-        mail: address,
-        file: encodedFile
-      });
-      console.log("post request success");
-      window.alert("送信に成功しました");
-    } catch (error) {
-      console.log(console.error);
-      window.alert("送信に失敗しました");
+    event.preventDefault();//ページ遷移を防ぐため
+    const address = this.state.emailAddress;
+    if (address == null || address === "") {
+      window.alert("メールアドレスを入力してください");
+      return;
     }
+    const formData = new FormData();
+    formData.append('text', address);
+    try {
+      const audioFile = await this.convertVideoToAudio(this.state.videoFile);
+      formData.append('file', audioFile);
+    } catch (error) {
+      window.alert('ファイルの変換に失敗しました');
+      console.error(error);
+      return;
+    }
+
+    const postUrl = process.env.REACT_APP_POST_URL;
+    if (postUrl == null) {
+      console.error("POST先のURLが指定されていません");
+      window.alert("送信に失敗しました");
+      return;
+    }
+
+    axios.post(postUrl, formData, {
+      headers: {
+        'content-type': 'multipart/form-data'
+      }
+    })
+      .then(() => {
+        console.log("post request success");
+        window.alert("送信に成功しました");
+      })
+      .catch((error) => {
+        console.log(error);
+        window.alert("送信に失敗しました");
+      });
+
   }
 
   render() {

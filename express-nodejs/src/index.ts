@@ -29,7 +29,6 @@ getSecretManagerValue('send_email_address').then((result) => {
     }
 });
 
-
 function uploadFileToGCS(upFile: Buffer, onFinish: (fileName: string) => void, onError: (err: Error) => void) {
     const fileName = uuidv4() + '.mp3';
     const storage = new Storage();
@@ -127,28 +126,25 @@ async function speechToText(fileName: string): Promise<string | null> {
 
 const app: express.Express = express();
 
-//1時間あたり100mb程度なので2~3時間程度でbase64でファイルサイズが大きくなる(1.4倍)ことを予想する
-app.use(express.json({ limit: '420mb' }));
-
 app.use(function (req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     next();
 })
 
-app.post('/api/', multer().fields([]), (req: express.Request, res: express.Response) => {
-    const decodedFile = Buffer.from(req.body.file, "base64");
-    uploadFileToGCS(decodedFile, (fileName) => {
+const upload = multer({ storage: multer.memoryStorage() });
+app.post('/api/', upload.single('file'), (req: express.Request, res: express.Response) => {
+    uploadFileToGCS(req.file.buffer, (fileName) => {
         speechToText(fileName).then((result) => {
             if (result === null) {
-                sendMail(null, req.body.mail, "文字を検出できませんでした");
+                sendMail(null, req.body.text, "文字を検出できませんでした");
             } else {
-                sendMail(result, req.body.mail, "文字起こしが完了しました。添付ファイルをご確認ください。");
+                sendMail(result, req.body.text, "文字起こしが完了しました。添付ファイルをご確認ください。");
             }
         })
     }, (err) => {
         console.error(err);
-        sendMail(null, req.body.mail, "文字起こしに失敗しました。");
+        sendMail(null, req.body.text, "文字起こしに失敗しました。");
     });
     res.send("success");
 });
