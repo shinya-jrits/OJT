@@ -1,6 +1,7 @@
 import React from 'react';
 import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg';
 import axios from 'axios';
+import ProgressBar from '@ramonak/react-progress-bar';
 
 interface convertVideoToAudioStateInterface {
   videoFile: File | undefined;
@@ -125,7 +126,11 @@ class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
           <p>
             <label>ファイル:<input type="file" accept="video/mp4" onChange={this.handleChange} /></label>
           </p>
-          <input type="submit" value={this.state.isProcessing ? this.state.progress + '%' : '送信'} disabled={this.state.isProcessing} />
+          <input type="submit" value="送信" disabled={this.state.isProcessing} />
+          {this.state.isProcessing
+            ? <p><ProgressBar completed={this.state.progress} /></p>
+            : ''
+          }
         </form>
       </div>
     );
