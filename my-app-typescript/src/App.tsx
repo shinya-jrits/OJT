@@ -59,10 +59,17 @@ class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
       window.alert("メールアドレスを入力してください");
       return;
     }
-    const audioFile = await this.convertVideoToAudio(this.state.videoFile);
     const formData = new FormData();
     formData.append('text', address);
-    formData.append('file', audioFile);
+    try {
+      const audioFile = await this.convertVideoToAudio(this.state.videoFile);
+      formData.append('file', audioFile);
+    } catch (error) {
+      window.alert('ファイルの変換に失敗しました');
+      console.error(error);
+      return;
+    }
+
 
     await axios.post("https://ojt-2020.uc.r.appspot.com/api/", formData, {
       headers: {
@@ -76,7 +83,7 @@ class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
       .catch((error) => {
         console.log(error);
         window.alert("送信に失敗しました");
-      })
+      });
 
   }
 
