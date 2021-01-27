@@ -70,8 +70,7 @@ class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
       return;
     }
 
-
-    await axios.post("https://ojt-2020.uc.r.appspot.com/api/", formData, {
+    axios.post("https://ojt-2020.uc.r.appspot.com/api/", formData, {
       headers: {
         'content-type': 'multipart/form-data'
       }
