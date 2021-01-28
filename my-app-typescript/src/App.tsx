@@ -26,6 +26,7 @@ class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
   constructor() {
     super({});
     this.state = { videoFile: undefined, emailAddress: undefined, progress: 0, isProcessing: false };
+    //stateは省略せずにすべての要素を書く必要がある
   }
   private async convertVideoToAudio(videoFile: File): Promise<Blob> {
     const ffmpeg = createFFmpeg({
