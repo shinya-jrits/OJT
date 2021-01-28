@@ -149,6 +149,4 @@ app.post('/api/', upload.single('file'), (req: express.Request, res: express.Res
     res.send("success");
 });
 
-app.listen(4000, () => {
-    console.log('example app listening on port 4000!')
-});
+app.listen(process.env.PORT || 8080, () => { console.log('example app listening on port 8080!') });
