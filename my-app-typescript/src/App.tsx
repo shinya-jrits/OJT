@@ -4,10 +4,10 @@ import axios from 'axios';
 import ProgressBar from '@ramonak/react-progress-bar';
 
 interface convertVideoToAudioStateInterface {
-  videoFile: File | undefined;
-  emailAddress: string | undefined;
   progress: number;
   isProcessing: boolean;
+  videoFile?: File;
+  emailAddress?: string;
 }
 
 function assertIsSingle(files: FileList | null): asserts files is NonNullable<FileList> {
@@ -25,8 +25,7 @@ function assertIsSingle(files: FileList | null): asserts files is NonNullable<Fi
 class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
   constructor() {
     super({});
-    this.state = { videoFile: undefined, emailAddress: undefined, progress: 0, isProcessing: false };
-    //stateは省略せずにすべての要素を書く必要がある
+    this.state = { progress: 0, isProcessing: false };
   }
   private async convertVideoToAudio(videoFile: File): Promise<Blob> {
     const ffmpeg = createFFmpeg({
