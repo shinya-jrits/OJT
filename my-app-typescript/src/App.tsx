@@ -27,6 +27,11 @@ class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
     super({});
     this.state = { progress: 0, isProcessing: false };
   }
+
+  componentDidMount() {
+    document.title = 'Teams会議の文字起こしツール'
+  }
+
   private async convertVideoToAudio(videoFile: File): Promise<Blob> {
     const ffmpeg = createFFmpeg({
       log: true
