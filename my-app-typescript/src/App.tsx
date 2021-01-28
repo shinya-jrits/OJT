@@ -32,23 +32,22 @@ class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
     const ffmpeg = createFFmpeg({
       log: true
     });
-    ffmpeg.setProgress(({ ratio }) => {
-      if (ratio < 1) {
-        this.setState({
-          progress: Math.round(100 * ratio),
-          isProcessing: true
-        });
-      } else {
-        this.setState({
-          progress: 0,
-          isProcessing: false
-        });
-      }
+    this.setState({
+      progress: 0,
+      isProcessing: true
     });
     await ffmpeg.load();
     const fetchedFile = await fetchFile(videoFile);
     ffmpeg.FS('writeFile', videoFile.name, fetchedFile);
+    ffmpeg.setProgress(({ ratio }) => {
+      this.setState({
+        progress: Math.round(100 * ratio)
+      });
+    });
     await ffmpeg.run('-i', videoFile.name, '-ac', '1', '-ab', '54k', 'audio.mp3');
+    this.setState({
+      isProcessing: false
+    });
     const resultFile = ffmpeg.FS('readFile', 'audio.mp3');
     const resultBlob = new Blob([resultFile.buffer], {
       type: 'audio/mp3'
@@ -90,6 +89,9 @@ class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
       formData.append('file', audioFile);
     } catch (error) {
       window.alert('ファイルの変換に失敗しました');
+      this.setState({
+        isProcessing: false
+      });
       console.error(error);
       return;
     }
