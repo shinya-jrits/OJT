@@ -44,9 +44,6 @@ class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
       });
     });
     await ffmpeg.run('-i', videoFile.name, '-ac', '1', '-ab', '54k', 'audio.mp3');
-    this.setState({
-      isProcessing: false
-    });
     const resultFile = ffmpeg.FS('readFile', 'audio.mp3');
     const resultBlob = new Blob([resultFile.buffer], {
       type: 'audio/mp3'
@@ -88,11 +85,12 @@ class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
       formData.append('file', audioFile);
     } catch (error) {
       window.alert('ファイルの変換に失敗しました');
+      console.error(error);
+      return;
+    } finally {
       this.setState({
         isProcessing: false
       });
-      console.error(error);
-      return;
     }
 
     const postUrl = process.env.REACT_APP_POST_URL;
