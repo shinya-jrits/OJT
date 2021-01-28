@@ -1,12 +1,13 @@
 import React from 'react';
 import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg';
 import axios from 'axios';
+import ProgressBar from '@ramonak/react-progress-bar';
 
 interface convertVideoToAudioStateInterface {
-  videoFile: File | undefined;
-  emailAddress: string | undefined;
-  buttonText: string;
+  progress: number;
   isProcessing: boolean;
+  videoFile?: File;
+  emailAddress?: string;
 }
 
 function assertIsSingle(files: FileList | null): asserts files is NonNullable<FileList> {
@@ -24,28 +25,24 @@ function assertIsSingle(files: FileList | null): asserts files is NonNullable<Fi
 class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
   constructor() {
     super({});
-    this.state = { videoFile: undefined, emailAddress: undefined, buttonText: '送信', isProcessing: false };
+    this.state = { progress: 0, isProcessing: false };
   }
   private async convertVideoToAudio(videoFile: File): Promise<Blob> {
     const ffmpeg = createFFmpeg({
       log: true
     });
-    ffmpeg.setProgress(({ ratio }) => {
-      if (ratio < 1) {
-        this.setState({
-          buttonText: Math.round(100 * ratio) + '%',
-          isProcessing: true
-        });
-      } else {
-        this.setState({
-          buttonText: '送信',
-          isProcessing: false
-        });
-      }
+    this.setState({
+      progress: 0,
+      isProcessing: true
     });
     await ffmpeg.load();
     const fetchedFile = await fetchFile(videoFile);
     ffmpeg.FS('writeFile', 'video', fetchedFile);
+    ffmpeg.setProgress(({ ratio }) => {
+      this.setState({
+        progress: Math.round(100 * ratio)
+      });
+    });
     await ffmpeg.run('-i', 'video', '-ac', '1', '-ab', '54k', 'audio.mp3');
     const resultFile = ffmpeg.FS('readFile', 'audio.mp3');
     const resultBlob = new Blob([resultFile.buffer], {
@@ -90,6 +87,10 @@ class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
       window.alert('ファイルの変換に失敗しました');
       console.error(error);
       return;
+    } finally {
+      this.setState({
+        isProcessing: false
+      });
     }
 
     const postUrl = process.env.REACT_APP_POST_URL;
@@ -125,7 +126,11 @@ class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
           <p>
             <label>ファイル:<input type="file" accept="video/mp4" onChange={this.handleChange} /></label>
           </p>
-          <input type="submit" value={this.state.buttonText} disabled={this.state.isProcessing} />
+          <input type="submit" value="送信" disabled={this.state.isProcessing} />
+          {this.state.isProcessing
+            ? <p><ProgressBar completed={this.state.progress} /></p>
+            : ''
+          }
         </form>
       </div>
     );
