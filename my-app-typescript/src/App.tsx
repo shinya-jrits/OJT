@@ -27,6 +27,11 @@ class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
     super({});
     this.state = { progress: 0, isProcessing: false };
   }
+
+  componentDidMount() {
+    document.title = 'Teams会議の文字起こしツール';
+  }
+
   private async convertVideoToAudio(videoFile: File): Promise<Blob> {
     const ffmpeg = createFFmpeg({
       log: true
@@ -37,13 +42,13 @@ class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
     });
     await ffmpeg.load();
     const fetchedFile = await fetchFile(videoFile);
-    ffmpeg.FS('writeFile', videoFile.name, fetchedFile);
+    ffmpeg.FS('writeFile', 'video', fetchedFile);
     ffmpeg.setProgress(({ ratio }) => {
       this.setState({
         progress: Math.round(100 * ratio)
       });
     });
-    await ffmpeg.run('-i', videoFile.name, '-ac', '1', '-ab', '54k', 'audio.mp3');
+    await ffmpeg.run('-i', 'video', '-ac', '1', '-ab', '54k', 'audio.mp3');
     const resultFile = ffmpeg.FS('readFile', 'audio.mp3');
     const resultBlob = new Blob([resultFile.buffer], {
       type: 'audio/mp3'
