@@ -5,37 +5,51 @@ import { SecretManagerServiceClient } from '@google-cloud/secret-manager'
 import multer from 'multer'
 import { uploadFileToGCS } from '../src/uploadFileToGCS'
 
-namespace EnvironmentVariable {
-    export let fromAddress: string = "";
-    export const bucketName = 'meeting_voice_file_jrits';
+class EnvironmentVariable {
+    fromAddress?: string;
+    bucketName?: string;
+    constructor() {
+        getSecretManagerValue('send_email_address').then((result) => {
+            if (result != null) {
+                this.fromAddress = result;
+            } else {
+                console.error("emailアドレスの取得に失敗しました");
+            }
+        }).catch((error) => {
+            console.error(error);
+        });
+        getSecretManagerValue('meeting_voice_file_dir').then((result) => {
+            if (result != null) {
+                this.bucketName = result;
+            } else {
+                console.error("バケット名の取得に失敗しました");
+            }
+        }).catch((error) => {
+            console.error(error);
+        });
+        //SendGridAPIの設定
+        getSecretManagerValue('sendgrid_api_key').then((result) => {
+            if (result != null) {
+                sendgrid.setApiKey(result);
+            } else {
+                console.error("SendGrid_API_keyの取得に失敗しました");
+            }
+        }).catch((error) => {
+            console.error(error);
+        });
+    }
 }
 
-//SendGridAPIの設定
-getSecretManagerValue('sendgrid_api_key').then((result) => {
-    if (result != null) {
-        sendgrid.setApiKey(result);
-    } else {
-        console.error("SendGrid_API_keyの取得に失敗しました");
-    }
-});
-
-//emailアドレスの設定
-getSecretManagerValue('send_email_address').then((result) => {
-    if (result != null) {
-        EnvironmentVariable.fromAddress = result;
-    } else {
-        console.error("emailアドレスの取得に失敗しました");
-    }
-});
+const environmentVariable = new EnvironmentVariable();
 
 async function sendMail(transcript: string | null, toAddress: string, mailText: string) {
-    if (EnvironmentVariable.fromAddress === "") {
+    if (environmentVariable.fromAddress == null) {
         console.error("emailアドレスの取得に失敗しました");
         return;
     }
     const msg = {
         to: toAddress,
-        from: EnvironmentVariable.fromAddress,
+        from: environmentVariable.fromAddress,
         subject: '文字起こし結果',
         text: mailText,
         attachments:
@@ -80,7 +94,7 @@ async function speechToText(fileName: string): Promise<string | null> {
         enableAutomaticPunctuation: true,
     };
     const audio = {
-        uri: 'gs://' + EnvironmentVariable.bucketName + '/' + fileName,
+        uri: 'gs://' + environmentVariable.bucketName + '/' + fileName,
     };
     const request = {
         config: config,
