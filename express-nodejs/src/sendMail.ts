@@ -1,5 +1,5 @@
 import sendgrid from '@sendgrid/mail'
-import { getSecretManagerValue } from '../src/SecretManager'
+import { getSecretManagerValue } from '#/SecretManager'
 export class SendMail {
     constructor() {
         //SendGridAPIの設定

@@ -1,9 +1,9 @@
 import express from 'express'
 import multer from 'multer'
-import { uploadFileToGCS } from '../src/uploadFileToGCS'
-import { SendMail } from '../src/sendMail'
-import { speechToText } from '../src/speechToText'
-import { EnvironmentVariable } from '../src/EnvironmentVariable'
+import { uploadFileToGCS } from '#/uploadFileToGCS'
+import { SendMail } from '#/sendMail'
+import { speechToText } from '#/speechToText'
+import { EnvironmentVariable } from '#/EnvironmentVariable'
 
 const environmentVariable = new EnvironmentVariable();
 const sendMail = new SendMail();
