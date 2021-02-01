@@ -14,11 +14,7 @@ export class SendMail {
         });
     }
 
-    async sendMail(transcript: string | null, toAddress: string, mailText: string, fromAddress: string | null) {
-        if (fromAddress == null) {
-            console.error("emailアドレスの取得に失敗しました");
-            return;
-        }
+    async sendMail(transcript: string | null, toAddress: string, mailText: string, fromAddress: string) {
         const msg = {
             to: toAddress,
             from: fromAddress,
