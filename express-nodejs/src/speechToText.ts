@@ -1,6 +1,6 @@
 import Speech from '@google-cloud/speech'
 
-export async function speechToText(fileName: string, bucketName?: string): Promise<string | null> {
+export async function speechToText(fileName: string, bucketName: string): Promise<string | null> {
     const client = new Speech.v1p1beta1.SpeechClient();
     const config = {
         languageCode: 'ja-JP',
