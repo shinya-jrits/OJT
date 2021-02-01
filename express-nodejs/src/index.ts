@@ -1,9 +1,9 @@
 import express from 'express'
-import Speech from '@google-cloud/speech'
-import sendgrid from '@sendgrid/mail'
-import { SecretManagerServiceClient } from '@google-cloud/secret-manager'
+import { getSecretManagerValue } from '../src/SecretManager'
 import multer from 'multer'
 import { uploadFileToGCS } from '../src/uploadFileToGCS'
+import { SendMail } from '../src/sendMail'
+import { speechToText } from '../src/speechToText'
 
 class EnvironmentVariable {
     fromAddress?: string;
@@ -27,96 +27,11 @@ class EnvironmentVariable {
         }).catch((error) => {
             console.error(error);
         });
-        //SendGridAPIの設定
-        getSecretManagerValue('sendgrid_api_key').then((result) => {
-            if (result != null) {
-                sendgrid.setApiKey(result);
-            } else {
-                console.error("SendGrid_API_keyの取得に失敗しました");
-            }
-        }).catch((error) => {
-            console.error(error);
-        });
     }
 }
 
 const environmentVariable = new EnvironmentVariable();
-
-async function sendMail(transcript: string | null, toAddress: string, mailText: string) {
-    if (environmentVariable.fromAddress == null) {
-        console.error("emailアドレスの取得に失敗しました");
-        return;
-    }
-    const msg = {
-        to: toAddress,
-        from: environmentVariable.fromAddress,
-        subject: '文字起こし結果',
-        text: mailText,
-        attachments:
-            (transcript == null)
-                ? []
-                : [
-                    {
-                        content: Buffer.from(transcript).toString('base64'),
-                        filename: 'result.txt',
-                        type: 'text/plain',
-                        disposition: 'attachment',
-                        contentId: 'mytext',
-                    }
-                ]
-    }
-    try {
-        await sendgrid.send(msg);
-        console.log("send mail success");
-    } catch (err) {
-        console.error(err.toString());
-    }
-}
-
-async function getSecretManagerValue(secretId: string): Promise<string | null> {
-    const client = new SecretManagerServiceClient();
-    const [accessResponse] = await client.accessSecretVersion({
-        name: 'projects/483600820879/secrets/' + secretId + '/versions/latest',
-    })
-    if (accessResponse.payload?.data == null) {
-        return null;
-    } else {
-        const responsePayload = accessResponse.payload.data.toString();
-        return responsePayload;
-    }
-
-}
-
-async function speechToText(fileName: string): Promise<string | null> {
-    const client = new Speech.v1p1beta1.SpeechClient();
-    const config = {
-        languageCode: 'ja-JP',
-        enableAutomaticPunctuation: true,
-    };
-    const audio = {
-        uri: 'gs://' + environmentVariable.bucketName + '/' + fileName,
-    };
-    const request = {
-        config: config,
-        audio: audio,
-    };
-
-    const [operation] = await client.longRunningRecognize(request);
-
-    const [responese] = await operation.promise();
-    if (responese.results == null) {
-        console.error("文字起こしに失敗しました");
-        return null;
-    } else if (responese.results.length === 0) {
-        console.log("文字を検出できませんでした。");
-        return null;
-    } else {
-        console.log("文字起こしが完了しました");
-        return responese.results
-            .filter(resutlt => resutlt.alternatives != null)
-            .map(result => result.alternatives![0].transcript).join('\n');
-    }
-}
+const sendMail = new SendMail();
 
 const app: express.Express = express();
 
@@ -129,16 +44,16 @@ app.use(function (req, res, next) {
 const upload = multer({ storage: multer.memoryStorage() });
 app.post('/api/', upload.single('file'), (req: express.Request, res: express.Response) => {
     uploadFileToGCS(req.file.buffer, (fileName) => {
-        speechToText(fileName).then((result) => {
+        speechToText(fileName, environmentVariable.bucketName).then((result) => {
             if (result === null) {
-                sendMail(null, req.body.text, "文字を検出できませんでした");
+                sendMail.sendMail(null, req.body.text, "文字を検出できませんでした", environmentVariable.fromAddress);
             } else {
-                sendMail(result, req.body.text, "文字起こしが完了しました。添付ファイルをご確認ください。");
+                sendMail.sendMail(result, req.body.text, "文字起こしが完了しました。添付ファイルをご確認ください。", environmentVariable.fromAddress);
             }
         })
     }, (err) => {
         console.error(err);
-        sendMail(null, req.body.text, "文字起こしに失敗しました。");
+        sendMail.sendMail(null, req.body.text, "文字起こしに失敗しました。", environmentVariable.fromAddress);
     });
     res.send("success");
 });
