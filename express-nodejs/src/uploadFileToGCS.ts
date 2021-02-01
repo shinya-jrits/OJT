@@ -1,10 +1,10 @@
 import { stringify, v4 as uuidv4 } from 'uuid'
 import { Storage } from '@google-cloud/storage'
 
-export function uploadFileToGCS(upFile: Buffer, onFinish: (fileName: string) => void, onError: (err: Error) => void) {
+export function uploadFileToGCS(upFile: Buffer, onFinish: (fileName: string) => void, onError: (err: Error) => void, bucketName: string) {
     const fileName = uuidv4() + '.mp3';
     const storage = new Storage();
-    const stream = storage.bucket(EnvironmentVariable.bucketName).file(fileName).createWriteStream({
+    const stream = storage.bucket(bucketName).file(fileName).createWriteStream({
         metadata: {
             contentType: 'audio/mp3',
         },
