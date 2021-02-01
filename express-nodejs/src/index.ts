@@ -3,7 +3,7 @@ import Speech from '@google-cloud/speech'
 import sendgrid from '@sendgrid/mail'
 import { SecretManagerServiceClient } from '@google-cloud/secret-manager'
 import multer from 'multer'
-import { uploadFileToGCS } from '../src/GCS'
+import { uploadFileToGCS } from '../src/uploadFileToGCS'
 
 namespace EnvironmentVariable {
     export let fromAddress: string = "";
