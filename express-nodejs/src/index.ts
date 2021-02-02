@@ -1,12 +1,22 @@
-import express from 'express'
+import express, { Send } from 'express'
 import multer from 'multer'
 import { uploadFileToGCS } from '#/uploadFileToGCS'
 import { SendMail } from '#/sendMail'
 import { speechToText } from '#/speechToText'
 import { EnvironmentVariable } from '#/EnvironmentVariable'
+import { getSecretValue } from '#/SecretManager'
 
 const environmentVariable = new EnvironmentVariable();
-const sendMail = new SendMail();
+let sendMail: SendMail;
+getSecretValue('sendgrid_api_key').then(result => {
+    if (result == null) {
+        console.error("SendGridのAPI取得に失敗しました")
+    } else {
+        sendMail = new SendMail(result);
+    }
+}).catch((error) => {
+    console.error(error);
+});
 
 const app: express.Express = express();
 
