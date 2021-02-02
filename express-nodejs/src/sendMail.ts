@@ -9,10 +9,10 @@ export class SendMail {
 
     /**
      * メールを送信する
-     * @param transcript 文字起こし結果
      * @param toAddress 送信先アドレス
      * @param mailText メール本文
      * @param fromAddress 送信元アドレス
+     * @param attachment テキストファイルで添付する文字列
      */
     async sendMail(toAddress: string, mailText: string, fromAddress: string, attachment?: string) {
         const msg = {
