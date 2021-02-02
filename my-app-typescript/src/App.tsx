@@ -23,7 +23,7 @@ function assertIsSingle(files: FileList | null): asserts files is NonNullable<Fi
   }
 }
 
-class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
+class App extends React.Component<{}, convertVideoToAudioStateInterface> {
   constructor() {
     super({});
     this.state = { progress: 0, isProcessing: false };
@@ -109,4 +109,4 @@ class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
   }
 }
 
-export default MovieForm;
+export default App;
