@@ -6,16 +6,14 @@ import { v1p1beta1 } from '@google-cloud/speech'
  * @param bucketName ファイルが保存されているGoogleCloudStorageのバケット名
  */
 export async function speechToText(fileName: string, bucketName: string, client: v1p1beta1.SpeechClient): Promise<string | null> {
-    const config = {
-        languageCode: 'ja-JP',
-        enableAutomaticPunctuation: true,
-    };
-    const audio = {
-        uri: 'gs://' + bucketName + '/' + fileName,
-    };
     const request = {
-        config: config,
-        audio: audio,
+        config: {
+            languageCode: 'ja-JP',
+            enableAutomaticPunctuation: true,
+        },
+        audio: {
+            uri: 'gs://' + bucketName + '/' + fileName
+        }
     };
 
     const [operation] = await client.longRunningRecognize(request);
