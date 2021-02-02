@@ -1,12 +1,11 @@
-import Speech from '@google-cloud/speech'
+import { v1p1beta1 } from '@google-cloud/speech'
 
 /**
  * GoogleSpeechToTextで文字起こしを行う
  * @param fileName 文字起こしを行うファイルの名前
  * @param bucketName ファイルが保存されているGoogleCloudStorageのバケット名
  */
-export async function speechToText(fileName: string, bucketName: string): Promise<string | null> {
-    const client = new Speech.v1p1beta1.SpeechClient();
+export async function speechToText(fileName: string, bucketName: string, client: v1p1beta1.SpeechClient): Promise<string | null> {
     const config = {
         languageCode: 'ja-JP',
         enableAutomaticPunctuation: true,

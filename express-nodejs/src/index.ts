@@ -5,6 +5,7 @@ import { SendMail } from '#/sendMail'
 import { speechToText } from '#/speechToText'
 import { EnvironmentVariable } from '#/EnvironmentVariable'
 import { getSecretValue } from '#/SecretManager'
+import Speech from '@google-cloud/speech'
 
 const environmentVariable = new EnvironmentVariable();
 let sendMail: SendMail;
@@ -42,7 +43,7 @@ app.post('/api/', upload.single('file'), (req: express.Request, res: express.Res
         return;
     }
     uploadFileToGCS(req.file.buffer, (fileName) => {
-        speechToText(fileName, environmentVariable.bucketName!).then((result) => {
+        speechToText(fileName, environmentVariable.bucketName!, new Speech.v1p1beta1.SpeechClient()).then((result) => {
             if (result === null) {
                 sendMail.sendMail(req.body.text, "文字を検出できませんでした", environmentVariable.fromAddress!);
             } else {
