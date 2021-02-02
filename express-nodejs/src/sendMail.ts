@@ -1,10 +1,10 @@
 import sendgrid from '@sendgrid/mail'
-import { getSecretManagerValue } from '#/SecretManager'
+import { getSecretValue } from '#/SecretManager'
 
 export class SendMail {
     constructor() {
         //SendGridAPIの設定
-        getSecretManagerValue('sendgrid_api_key').then((result) => {
+        getSecretValue('sendgrid_api_key').then((result) => {
             if (result != null) {
                 sendgrid.setApiKey(result);
             } else {
