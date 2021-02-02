@@ -37,21 +37,21 @@ app.post('/api/', upload.single('file'), (req: express.Request, res: express.Res
         return;
     }
     if (environmentVariable.bucketName == null) {
-        sendMail.sendMail(null, req.body.text, "文字起こしに失敗しました。", environmentVariable.fromAddress);
+        sendMail.sendMail(req.body.text, "文字起こしに失敗しました。", environmentVariable.fromAddress);
         console.error("バケット名の取得に失敗しました");
         return;
     }
     uploadFileToGCS(req.file.buffer, (fileName) => {
         speechToText(fileName, environmentVariable.bucketName!).then((result) => {
             if (result === null) {
-                sendMail.sendMail(null, req.body.text, "文字を検出できませんでした", environmentVariable.fromAddress!);
+                sendMail.sendMail(req.body.text, "文字を検出できませんでした", environmentVariable.fromAddress!);
             } else {
-                sendMail.sendMail(result, req.body.text, "文字起こしが完了しました。添付ファイルをご確認ください。", environmentVariable.fromAddress!);
+                sendMail.sendMail(req.body.text, "文字起こしが完了しました。添付ファイルをご確認ください。", environmentVariable.fromAddress!, result);
             }
         })
     }, (err) => {
         console.error(err);
-        sendMail.sendMail(null, req.body.text, "文字起こしに失敗しました。", environmentVariable.fromAddress!);
+        sendMail.sendMail(req.body.text, "文字起こしに失敗しました。", environmentVariable.fromAddress!);
     }, environmentVariable.bucketName);
     res.send("success");
 });
