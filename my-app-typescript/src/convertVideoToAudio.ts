@@ -1,5 +1,10 @@
 import { FFmpeg, fetchFile } from "@ffmpeg/ffmpeg";
 
+/**
+ * 動画ファイルを音声ファイルに変換する
+ * @param videoFile 変換元ファイル 
+ * @param ffmpeg 変換を実行するメソッド
+ */
 export async function convertVideoToAudio(videoFile: File, ffmpeg: FFmpeg): Promise<Blob> {
     await ffmpeg.load();
     const fetchedFile = await fetchFile(videoFile);

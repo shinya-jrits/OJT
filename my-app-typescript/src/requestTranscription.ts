@@ -1,5 +1,10 @@
 import axios from 'axios';
 
+/**
+ * バックエンドサーバに文字起こしをリクエストする
+ * @param emailAddress 文字起こし結果を送信するアドレス
+ * @param audioFile 文字起こしするオーディオファイル
+ */
 export function requestTranscription(emailAddress: string, audioFile: File) {
     const formData = new FormData;
     formData.append("text", emailAddress);
