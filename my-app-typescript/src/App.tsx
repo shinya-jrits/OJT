@@ -3,24 +3,13 @@ import { createFFmpeg } from '@ffmpeg/ffmpeg';
 import ProgressBar from '@ramonak/react-progress-bar';
 import { convertVideoToAudio } from './convertVideoToAudio'
 import { requestTranscription } from './requestTranscription'
+import { assertIsSingle } from './assertIsSingle'
 
 interface convertVideoToAudioStateInterface {
   progress: number;
   isProcessing: boolean;
   videoFile?: File;
   emailAddress?: string;
-}
-
-function assertIsSingle(files: FileList | null): asserts files is NonNullable<FileList> {
-  if (files == null) {
-    throw new Error(
-      `filesが不正な値です,${files}でした`
-    );
-  } else if (files.length > 1) {
-    throw new Error(
-      `files.lengthが不正な値です,${files.length}でした`
-    );
-  }
 }
 
 class App extends React.Component<{}, convertVideoToAudioStateInterface> {
@@ -33,8 +22,10 @@ class App extends React.Component<{}, convertVideoToAudioStateInterface> {
     document.title = 'Teams会議の文字起こしツール';
   }
 
-
-
+  /**
+   * 入力フォームの変更をstateに保存する
+   * @param event 変更された部分
+   */
   handleChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
     if (event.target.files != null) {
       assertIsSingle(event.target.files);
@@ -51,6 +42,10 @@ class App extends React.Component<{}, convertVideoToAudioStateInterface> {
     }
   }
 
+  /**
+   * 動画ファイルを変換して、メールアドレスと一緒に文字起こしリクエストをバックエンドに送信する
+   * @param event フォームインベント
+   */
   handleSubmit = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();//ページ遷移を防ぐため
     if (this.state.emailAddress == null || this.state.emailAddress === "") {
