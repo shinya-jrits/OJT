@@ -1,5 +1,6 @@
 import sendgrid from '@sendgrid/mail'
 import { getSecretManagerValue } from '#/SecretManager'
+
 export class SendMail {
     constructor() {
         //SendGridAPIの設定
@@ -14,6 +15,13 @@ export class SendMail {
         });
     }
 
+    /**
+     * メールを送信する
+     * @param transcript 文字起こし結果
+     * @param toAddress 送信先アドレス
+     * @param mailText メール本文
+     * @param fromAddress 送信元アドレス
+     */
     async sendMail(transcript: string | null, toAddress: string, mailText: string, fromAddress: string) {
         const msg = {
             to: toAddress,

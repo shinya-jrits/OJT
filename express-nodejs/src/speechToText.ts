@@ -1,5 +1,10 @@
 import Speech from '@google-cloud/speech'
 
+/**
+ * GoogleSpeechToTextで文字起こしを行う
+ * @param fileName 文字起こしを行うファイルの名前
+ * @param bucketName ファイルが保存されているGoogleCloudStorageのバケット名
+ */
 export async function speechToText(fileName: string, bucketName: string): Promise<string | null> {
     const client = new Speech.v1p1beta1.SpeechClient();
     const config = {

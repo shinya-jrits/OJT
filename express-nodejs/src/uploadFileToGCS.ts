@@ -1,6 +1,13 @@
 import { stringify, v4 as uuidv4 } from 'uuid'
 import { Storage } from '@google-cloud/storage'
 
+/**
+ * GoogleCloudStorageにファイルを保存する
+ * @param upFile 保存するファイル
+ * @param onFinish ファイル送信完了後に実行する関数
+ * @param onError エラー時に実行する関数
+ * @param bucketName GoogleCloudStorageのバケット名
+ */
 export function uploadFileToGCS(upFile: Buffer, onFinish: (fileName: string) => void, onError: (err: Error) => void, bucketName: string) {
     const fileName = uuidv4() + '.mp3';
     const storage = new Storage();

@@ -17,6 +17,10 @@ app.use(function (req, res, next) {
 })
 
 const upload = multer({ storage: multer.memoryStorage() });
+
+/**
+ * postリクエストを受け取って実行する
+ */
 app.post('/api/', upload.single('file'), (req: express.Request, res: express.Response) => {
     if (environmentVariable.fromAddress == null) {
         console.error("送信元のemailが取得できませんでした");

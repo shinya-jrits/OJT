@@ -1,5 +1,9 @@
 import { SecretManagerServiceClient } from '@google-cloud/secret-manager'
 
+/**
+ * SecretManagerからシークレット値を取り出す
+ * @param secretId シークレットの名前
+ */
 export async function getSecretManagerValue(secretId: string): Promise<string | null> {
     const client = new SecretManagerServiceClient();
     const [accessResponse] = await client.accessSecretVersion({
