@@ -14,18 +14,18 @@ export class SendMail {
      * @param mailText メール本文
      * @param fromAddress 送信元アドレス
      */
-    async sendMail(transcript: string | null, toAddress: string, mailText: string, fromAddress: string) {
+    async sendMail(toAddress: string, mailText: string, fromAddress: string, attachment?: string) {
         const msg = {
             to: toAddress,
             from: fromAddress,
             subject: '文字起こし結果',
             text: mailText,
             attachments:
-                (transcript == null)
+                (attachment == null)
                     ? []
                     : [
                         {
-                            content: Buffer.from(transcript).toString('base64'),
+                            content: Buffer.from(attachment).toString('base64'),
                             filename: 'result.txt',
                             type: 'text/plain',
                             disposition: 'attachment',
