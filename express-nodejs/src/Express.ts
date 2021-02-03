@@ -5,11 +5,18 @@ import { SendMail } from '#/sendMail'
 import { speechToText } from '#/speechToText'
 import Speech from '@google-cloud/speech'
 import { Storage } from '@google-cloud/storage'
+
 export class Express {
     app: express.Express;
     fromAddress: string;
     bucketName: string;
     sendMail: SendMail;
+    /**
+     * Expressでリクエストを受け取る
+     * @param fromAddress 返信元のメールアドレス
+     * @param bucketName 保存先のバケット名
+     * @param sendGridApiKey SendGridのAPIキー
+     */
     constructor(fromAddress: string, bucketName: string, sendGridApiKey: string) {
         this.app = express();
         this.fromAddress = fromAddress;
@@ -22,6 +29,9 @@ export class Express {
         });
     }
 
+    /**
+     * リクエストを受け取り文字起こしするメソッド
+     */
     Start(): void {
         const upload = multer({ storage: multer.memoryStorage() });
         this.app.post('/api/', upload.single('file'), (req: express.Request, res: express.Response) => {
