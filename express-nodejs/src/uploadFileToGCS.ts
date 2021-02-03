@@ -9,7 +9,8 @@ import { Storage } from '@google-cloud/storage'
  * @param bucketName GoogleCloudStorageのバケット名
  * @param storage GoogleCloudStrageのモジュール
  */
-export function uploadFileToGCS(upFile: Buffer,
+export function uploadFileToGCS(
+    upFile: Buffer,
     onFinish: (fileName: string) => void,
     onError: (err: Error) => void,
     bucketName: string,
