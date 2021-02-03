@@ -6,6 +6,7 @@ import { speechToText } from '#/speechToText'
 import { EnvironmentVariable } from '#/EnvironmentVariable'
 import { getSecretValue } from '#/SecretManager'
 import Speech from '@google-cloud/speech'
+import { Storage } from '@google-cloud/storage'
 
 const environmentVariable = new EnvironmentVariable();
 let sendMail: SendMail;
@@ -53,7 +54,7 @@ app.post('/api/', upload.single('file'), (req: express.Request, res: express.Res
     }, (err) => {
         console.error(err);
         sendMail.sendMail(req.body.text, "文字起こしに失敗しました。", environmentVariable.fromAddress!);
-    }, environmentVariable.bucketName);
+    }, environmentVariable.bucketName, new Storage());
     res.send("success");
 });
 

@@ -7,10 +7,10 @@ import { Storage } from '@google-cloud/storage'
  * @param onFinish ファイル送信完了後に実行する関数
  * @param onError エラー時に実行する関数
  * @param bucketName GoogleCloudStorageのバケット名
+ * @param storage GoogleCloudStrageのモジュール
  */
-export function uploadFileToGCS(upFile: Buffer, onFinish: (fileName: string) => void, onError: (err: Error) => void, bucketName: string) {
+export function uploadFileToGCS(upFile: Buffer, onFinish: (fileName: string) => void, onError: (err: Error) => void, bucketName: string, storage: Storage) {
     const fileName = uuidv4() + '.mp3';
-    const storage = new Storage();
     const stream = storage.bucket(bucketName).file(fileName).createWriteStream({
         metadata: {
             contentType: 'audio/mp3',
