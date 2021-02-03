@@ -4,19 +4,14 @@ import axios from 'axios';
  * バックエンドサーバに文字起こしをリクエストする
  * @param emailAddress 文字起こし結果を送信するアドレス
  * @param audioFile 文字起こしするオーディオファイル
+ * @param requestUrl 送信先のURL
  */
-export function requestTranscription(emailAddress: string, audioFile: Blob) {
+export function requestTranscription(emailAddress: string, audioFile: Blob, requestUrl: string) {
     const formData = new FormData;
     formData.append("text", emailAddress);
     formData.append("file", audioFile);
-    const postUrl = process.env.REACT_APP_POST_URL;
-    if (postUrl == null) {
-        console.error("POST先のURLが指定されていません");
-        window.alert("送信に失敗しました");
-        return;
-    }
 
-    axios.post(postUrl, formData, {
+    axios.post(requestUrl, formData, {
         headers: {
             'content-type': 'multipart/form-data'
         }
