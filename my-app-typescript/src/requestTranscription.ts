@@ -5,7 +5,7 @@ import axios from 'axios';
  * @param emailAddress 文字起こし結果を送信するアドレス
  * @param audioFile 文字起こしするオーディオファイル
  */
-export function requestTranscription(emailAddress: string, audioFile: File) {
+export function requestTranscription(emailAddress: string, audioFile: Blob) {
     const formData = new FormData;
     formData.append("text", emailAddress);
     formData.append("file", audioFile);
