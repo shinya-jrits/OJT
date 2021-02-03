@@ -70,7 +70,7 @@ class App extends React.Component<{}, convertVideoToAudioStateInterface> {
     });
     try {
       const audioFile = await convertVideoToAudio(this.state.videoFile, ffmpeg);
-      requestTranscription(this.state.emailAddress, this.state.videoFile);
+      requestTranscription(this.state.emailAddress, audioFile);
     } catch (error) {
       window.alert('ファイルの変換に失敗しました');
       console.error(error);
