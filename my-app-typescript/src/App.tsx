@@ -13,9 +13,15 @@ interface convertVideoToAudioStateInterface {
 }
 
 class App extends React.Component<{}, convertVideoToAudioStateInterface> {
+  requestUrl: string;
   constructor() {
     super({});
     this.state = { progress: 0, isProcessing: false };
+    if (process.env.REACT_APP_POST_URL == null) {
+      throw new Error('リクエスト先URLの取得に失敗しました');
+    } else {
+      this.requestUrl = process.env.REACT_APP_POST_URL;
+    }
   }
 
   componentDidMount() {
@@ -70,7 +76,7 @@ class App extends React.Component<{}, convertVideoToAudioStateInterface> {
     });
     try {
       const audioFile = await convertVideoToAudio(this.state.videoFile, ffmpeg);
-      requestTranscription(this.state.emailAddress, audioFile);
+      requestTranscription(this.state.emailAddress, audioFile, this.requestUrl);
     } catch (error) {
       window.alert('ファイルの変換に失敗しました');
       console.error(error);
