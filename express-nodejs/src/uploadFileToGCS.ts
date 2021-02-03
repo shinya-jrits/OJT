@@ -9,7 +9,11 @@ import { Storage } from '@google-cloud/storage'
  * @param bucketName GoogleCloudStorageのバケット名
  * @param storage GoogleCloudStrageのモジュール
  */
-export function uploadFileToGCS(upFile: Buffer, onFinish: (fileName: string) => void, onError: (err: Error) => void, bucketName: string, storage: Storage) {
+export function uploadFileToGCS(upFile: Buffer,
+    onFinish: (fileName: string) => void,
+    onError: (err: Error) => void,
+    bucketName: string,
+    storage: Storage): void {
     const fileName = uuidv4() + '.mp3';
     const stream = storage.bucket(bucketName).file(fileName).createWriteStream({
         metadata: {
