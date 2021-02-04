@@ -75,8 +75,8 @@ class App extends React.Component<{}, convertVideoToAudioStateInterface> {
       });
     });
     try {
-      const audioFile = await convertVideoToAudio(this.state.videoFile, ffmpeg);
-      requestTranscription(this.state.emailAddress, audioFile, this.requestUrl);
+      const audioBlob: Blob = await convertVideoToAudio(this.state.videoFile, ffmpeg);
+      requestTranscription(this.state.emailAddress, audioBlob, this.requestUrl);
     } catch (error) {
       window.alert('ファイルの変換に失敗しました');
       console.error(error);
