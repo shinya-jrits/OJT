@@ -9,18 +9,18 @@ import { Storage } from '@google-cloud/storage'
 export class Express {
     /**
      * Expressでリクエストを受け取る
+     * @param app Expressモジュール
      * @param storage GoogleCloudStorageのモジュール
      * @param bucketName 保存先のバケット名
      * @param sendMail SendMailクラス
      * @param fromAddress 返信元のメールアドレス
-     * @param app Expressモジュール
      */
     constructor(
+        private readonly app: express.Express,
         private readonly storage: Storage,
         private readonly bucketName: string,
         private readonly sendMail: SendMail,
-        private readonly fromAddress: string,
-        private readonly app: express.Express
+        private readonly fromAddress: string
     ) {
         this.app.use(function (req, res, next) {
             res.header('Access-Control-Allow-Origin', '*');

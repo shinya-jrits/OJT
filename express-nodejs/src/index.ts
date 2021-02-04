@@ -18,11 +18,11 @@ import express from 'express'
         throw new Error('sendGridのAPIキーの取得に失敗しました');
     }
     const expressClass = new Express(
+        express(),
         new Storage(),
         bucketName,
         new SendMail(sendGridApiKey),
-        fromAddress,
-        express());
+        fromAddress);
     expressClass.start();
 })();
 
