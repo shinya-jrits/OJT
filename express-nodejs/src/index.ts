@@ -1,5 +1,8 @@
 import { getSecretValue } from '#/SecretManager'
 import { Express } from '#/Express';
+import { Storage } from '@google-cloud/storage';
+import { SendMail } from './sendMail';
+import express from 'express'
 
 (async () => {
     const fromAddress = await getSecretValue('send_email_address');
@@ -14,7 +17,12 @@ import { Express } from '#/Express';
     if (sendGridApiKey == null) {
         throw new Error('sendGridのAPIキーの取得に失敗しました');
     }
-    const express = new Express(fromAddress, bucketName, sendGridApiKey);
-    express.Start();
+    const expressClass = new Express(
+        new Storage(),
+        bucketName,
+        new SendMail(sendGridApiKey),
+        fromAddress,
+        express());
+    expressClass.Start();
 })();
 

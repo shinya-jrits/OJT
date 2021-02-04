@@ -7,21 +7,21 @@ import Speech from '@google-cloud/speech'
 import { Storage } from '@google-cloud/storage'
 
 export class Express {
-    app: express.Express;
-    fromAddress: string;
-    bucketName: string;
-    sendMail: SendMail;
     /**
      * Expressでリクエストを受け取る
-     * @param fromAddress 返信元のメールアドレス
+     * @param storage GoogleCloudStorageのモジュール
      * @param bucketName 保存先のバケット名
-     * @param sendGridApiKey SendGridのAPIキー
+     * @param sendMail SendGridのAPIキー
+     * @param fromAddress 返信元のメールアドレス
+     * @param app Expressモジュール
      */
-    constructor(fromAddress: string, bucketName: string, sendGridApiKey: string) {
-        this.app = express();
-        this.fromAddress = fromAddress;
-        this.bucketName = bucketName;
-        this.sendMail = new SendMail(sendGridApiKey);
+    constructor(
+        private readonly storage: Storage,
+        private readonly bucketName: string,
+        private readonly sendMail: SendMail,
+        private readonly fromAddress: string,
+        private readonly app: express.Express
+    ) {
         this.app.use(function (req, res, next) {
             res.header('Access-Control-Allow-Origin', '*');
             res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
