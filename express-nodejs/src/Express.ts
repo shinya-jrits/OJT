@@ -11,7 +11,7 @@ export class Express {
      * Expressでリクエストを受け取る
      * @param storage GoogleCloudStorageのモジュール
      * @param bucketName 保存先のバケット名
-     * @param sendMail SendGridのAPIキー
+     * @param sendMail SendMailクラス
      * @param fromAddress 返信元のメールアドレス
      * @param app Expressモジュール
      */
