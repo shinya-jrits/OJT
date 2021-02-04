@@ -32,7 +32,7 @@ export class Express {
     /**
      * リクエストを受け取り文字起こしするメソッド
      */
-    Start(): void {
+    start(): void {
         const upload = multer({ storage: multer.memoryStorage() });
         this.app.post('/api/', upload.single('file'), (req: express.Request, res: express.Response) => {
             if (this.fromAddress == null) {

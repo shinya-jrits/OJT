@@ -23,6 +23,6 @@ import express from 'express'
         new SendMail(sendGridApiKey),
         fromAddress,
         express());
-    expressClass.Start();
+    expressClass.start();
 })();
 
