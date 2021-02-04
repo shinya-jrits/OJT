@@ -35,15 +35,6 @@ export class Express {
     start(): void {
         const upload = multer({ storage: multer.memoryStorage() });
         this.app.post('/api/', upload.single('file'), (req: express.Request, res: express.Response) => {
-            if (this.fromAddress == null) {
-                console.error("送信元のemailが取得できませんでした");
-                return;
-            }
-            if (this.bucketName == null) {
-                this.sendMail.sendMail(req.body.text, "文字起こしに失敗しました。", this.fromAddress);
-                console.error("バケット名の取得に失敗しました");
-                return;
-            }
             const onFinish = ((fileName: string) => {
                 speechToText(fileName, this.bucketName!, new Speech.v1p1beta1.SpeechClient()).then((result) => {
                     if (result === null) {
