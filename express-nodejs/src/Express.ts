@@ -36,11 +36,11 @@ export class Express {
         const upload = multer({ storage: multer.memoryStorage() });
         this.app.post('/api/', upload.single('file'), (req: express.Request, res: express.Response) => {
             const onFinish = ((fileName: string) => {
-                speechToText(fileName, this.bucketName!, new Speech.v1p1beta1.SpeechClient()).then((result) => {
+                speechToText(fileName, this.bucketName, new Speech.v1p1beta1.SpeechClient()).then((result) => {
                     if (result === null) {
-                        this.sendMail.sendMail(req.body.text, "文字を検出できませんでした", this.fromAddress!);
+                        this.sendMail.sendMail(req.body.text, "文字を検出できませんでした", this.fromAddress);
                     } else {
-                        this.sendMail.sendMail(req.body.text, "文字起こしが完了しました。添付ファイルをご確認ください。", this.fromAddress!, result);
+                        this.sendMail.sendMail(req.body.text, "文字起こしが完了しました。添付ファイルをご確認ください。", this.fromAddress, result);
                     }
                 })
             });
