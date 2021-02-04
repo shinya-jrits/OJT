@@ -4,8 +4,12 @@ import { v1p1beta1 } from '@google-cloud/speech'
  * GoogleSpeechToTextで文字起こしを行う
  * @param fileName 文字起こしを行うファイルの名前
  * @param bucketName ファイルが保存されているGoogleCloudStorageのバケット名
+ * @param client GoogleSpeechToTextのクライアントライブラリ
  */
-export async function speechToText(fileName: string, bucketName: string, client: v1p1beta1.SpeechClient): Promise<string | null> {
+export async function speechToText(
+    fileName: string,
+    bucketName: string,
+    client: v1p1beta1.SpeechClient): Promise<string | null> {
     const request = {
         config: {
             languageCode: 'ja-JP',
