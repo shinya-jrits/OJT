@@ -1,8 +1,9 @@
 import sendgrid from '@sendgrid/mail'
 
-
 export class SendMail {
-    constructor(sendGrid_ApiKey: string) {
+    constructor(
+        private readonly sendGrid_ApiKey: string
+    ) {
         //SendGridAPIの設定
         sendgrid.setApiKey(sendGrid_ApiKey);
     }
