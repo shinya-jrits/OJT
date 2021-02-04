@@ -44,7 +44,7 @@ export class Express {
                 console.error("バケット名の取得に失敗しました");
                 return;
             }
-            uploadFileToGCS(req.file.buffer, (fileName) => {
+            const onFinish = ((fileName: string) => {
                 speechToText(fileName, this.bucketName!, new Speech.v1p1beta1.SpeechClient()).then((result) => {
                     if (result === null) {
                         this.sendMail.sendMail(req.body.text, "文字を検出できませんでした", this.fromAddress!);
@@ -52,10 +52,18 @@ export class Express {
                         this.sendMail.sendMail(req.body.text, "文字起こしが完了しました。添付ファイルをご確認ください。", this.fromAddress!, result);
                     }
                 })
-            }, (err) => {
+            });
+            const onError = ((err: Error) => {
                 console.error(err);
                 this.sendMail.sendMail(req.body.text, "文字起こしに失敗しました。", this.fromAddress!);
-            }, this.bucketName, new Storage());
+            });
+
+            uploadFileToGCS(
+                req.file.buffer,
+                onFinish,
+                onError,
+                this.bucketName,
+                new Storage());
             res.send("success");
         });
         this.app.listen(process.env.PORT || 8080, () => { console.log('app listening on port 8080!') });
