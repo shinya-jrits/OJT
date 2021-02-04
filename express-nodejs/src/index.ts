@@ -21,8 +21,8 @@ import express from 'express'
         express(),
         new Storage(),
         bucketName,
-        new SendMail(sendGridApiKey),
-        fromAddress);
+        new SendMail(sendGridApiKey, fromAddress),
+    );
     expressClass.start();
 })();
 

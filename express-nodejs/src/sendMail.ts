@@ -1,8 +1,14 @@
 import sendgrid from '@sendgrid/mail'
 
 export class SendMail {
+    /**
+     * 
+     * @param sendGrid_ApiKey SendGridのAPIキー
+     * @param fromAddress 送信元のアドレス
+     */
     constructor(
-        private readonly sendGrid_ApiKey: string
+        private readonly sendGrid_ApiKey: string,
+        private readonly fromAddress: string
     ) {
         //SendGridAPIの設定
         sendgrid.setApiKey(sendGrid_ApiKey);
@@ -12,13 +18,12 @@ export class SendMail {
      * メールを送信する
      * @param toAddress 送信先アドレス
      * @param mailText メール本文
-     * @param fromAddress 送信元アドレス
      * @param attachment テキストファイルで添付する文字列
      */
-    async sendMail(toAddress: string, mailText: string, fromAddress: string, attachment?: string) {
+    async sendMail(toAddress: string, mailText: string, attachment?: string) {
         const msg = {
             to: toAddress,
-            from: fromAddress,
+            from: this.fromAddress,
             subject: '文字起こし結果',
             text: mailText,
             attachments:

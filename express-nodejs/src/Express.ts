@@ -13,14 +13,12 @@ export class Express {
      * @param storage GoogleCloudStorageのモジュール
      * @param bucketName 保存先のバケット名
      * @param sendMail SendMailクラス
-     * @param fromAddress 返信元のメールアドレス
      */
     constructor(
         private readonly app: express.Express,
         private readonly storage: Storage,
         private readonly bucketName: string,
-        private readonly sendMail: SendMail,
-        private readonly fromAddress: string
+        private readonly sendMail: SendMail
     ) {
         this.app.use(function (req, res, next) {
             res.header('Access-Control-Allow-Origin', '*');
@@ -38,15 +36,15 @@ export class Express {
             const onFinish = ((fileName: string) => {
                 speechToText(fileName, this.bucketName, new Speech.v1p1beta1.SpeechClient()).then((result) => {
                     if (result === null) {
-                        this.sendMail.sendMail(req.body.text, "文字を検出できませんでした", this.fromAddress);
+                        this.sendMail.sendMail(req.body.text, "文字を検出できませんでした");
                     } else {
-                        this.sendMail.sendMail(req.body.text, "文字起こしが完了しました。添付ファイルをご確認ください。", this.fromAddress, result);
+                        this.sendMail.sendMail(req.body.text, "文字起こしが完了しました。添付ファイルをご確認ください。", result);
                     }
                 })
             });
             const onError = ((err: Error) => {
                 console.error(err);
-                this.sendMail.sendMail(req.body.text, "文字起こしに失敗しました。", this.fromAddress!);
+                this.sendMail.sendMail(req.body.text, "文字起こしに失敗しました。");
             });
 
             uploadFileToGCS(
@@ -54,7 +52,8 @@ export class Express {
                 onFinish,
                 onError,
                 this.bucketName,
-                new Storage());
+                new Storage()
+            );
             res.send("success");
         });
         this.app.listen(process.env.PORT || 8080, () => { console.log('app listening on port 8080!') });
