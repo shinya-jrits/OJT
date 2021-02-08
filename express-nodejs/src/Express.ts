@@ -10,20 +10,18 @@ export class Express {
     /**
      * Expressでリクエストを受け取る
      * @param app Expressモジュール
-     * @param allowOrigin リソースへのアクセスを許可するオリジン
      * @param storage GoogleCloudStorageのモジュール
      * @param bucketName 保存先のバケット名
      * @param sendMail SendMailクラス
      */
     constructor(
         private readonly app: express.Express,
-        private readonly allowOrigin: string,
         private readonly storage: Storage,
         private readonly bucketName: string,
         private readonly sendMail: SendMail
     ) {
         this.app.use(function (req, res, next) {
-            res.header('Access-Control-Allow-Origin', allowOrigin);
+            res.header('Access-Control-Allow-Origin', '*');
             res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
             next();
         });
