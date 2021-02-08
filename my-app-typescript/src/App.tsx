@@ -1,7 +1,9 @@
 import React from 'react';
-import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg';
-import axios from 'axios';
+import { createFFmpeg } from '@ffmpeg/ffmpeg';
 import ProgressBar from '@ramonak/react-progress-bar';
+import { convertVideoToAudio } from './convertVideoToAudio'
+import { requestTranscription } from './requestTranscription'
+import { assertIsSingle } from './assertIsSingle'
 
 interface convertVideoToAudioStateInterface {
   progress: number;
@@ -10,52 +12,25 @@ interface convertVideoToAudioStateInterface {
   emailAddress?: string;
 }
 
-function assertIsSingle(files: FileList | null): asserts files is NonNullable<FileList> {
-  if (files == null) {
-    throw new Error(
-      `filesが不正な値です,${files}でした`
-    );
-  } else if (files.length > 1) {
-    throw new Error(
-      `files.lengthが不正な値です,${files.length}でした`
-    );
-  }
-}
-
-class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
+class App extends React.Component<{}, convertVideoToAudioStateInterface> {
+  requestUrl: string;
   constructor() {
     super({});
     this.state = { progress: 0, isProcessing: false };
+    if (process.env.REACT_APP_POST_URL == null) {
+      throw new Error('リクエスト先URLの取得に失敗しました');
+    }
+    this.requestUrl = process.env.REACT_APP_POST_URL;
   }
 
   componentDidMount() {
     document.title = 'Teams会議の文字起こしツール';
   }
 
-  private async convertVideoToAudio(videoFile: File): Promise<Blob> {
-    const ffmpeg = createFFmpeg({
-      log: true
-    });
-    this.setState({
-      progress: 0,
-      isProcessing: true
-    });
-    await ffmpeg.load();
-    const fetchedFile = await fetchFile(videoFile);
-    ffmpeg.FS('writeFile', 'video', fetchedFile);
-    ffmpeg.setProgress(({ ratio }) => {
-      this.setState({
-        progress: Math.round(100 * ratio)
-      });
-    });
-    await ffmpeg.run('-i', 'video', '-ac', '1', '-ab', '54k', 'audio.mp3');
-    const resultFile = ffmpeg.FS('readFile', 'audio.mp3');
-    const resultBlob = new Blob([resultFile.buffer], {
-      type: 'audio/mp3'
-    });
-    return resultBlob;
-  }
-
+  /**
+   * 入力フォームの変更をstateに保存する
+   * @param event 変更された部分
+   */
   handleChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
     if (event.target.files != null) {
       assertIsSingle(event.target.files);
@@ -63,7 +38,6 @@ class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
         videoFile: event.target.files[0],
       });
     }
-
 
     if (event.target.type === 'email') {
       console.log(event.target.value);
@@ -73,6 +47,10 @@ class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
     }
   }
 
+  /**
+   * 動画ファイルを変換して、メールアドレスと一緒に文字起こしリクエストをバックエンドに送信する
+   * @param event フォームインベント
+   */
   handleSubmit = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();//ページ遷移を防ぐため
     if (this.state.emailAddress == null || this.state.emailAddress === "") {
@@ -83,11 +61,21 @@ class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
       window.alert("ファイルを選択してください");
       return;
     }
-    const formData = new FormData();
-    formData.append('text', this.state.emailAddress);
+    const ffmpeg = createFFmpeg({
+      log: true
+    });
+    this.setState({
+      progress: 0,
+      isProcessing: true
+    });
+    ffmpeg.setProgress(({ ratio }) => {
+      this.setState({
+        progress: Math.round(100 * ratio)
+      });
+    });
     try {
-      const audioFile = await this.convertVideoToAudio(this.state.videoFile);
-      formData.append('file', audioFile);
+      const audioBlob: Blob = await convertVideoToAudio(this.state.videoFile, ffmpeg);
+      requestTranscription(this.state.emailAddress, audioBlob, this.requestUrl);
     } catch (error) {
       window.alert('ファイルの変換に失敗しました');
       console.error(error);
@@ -97,28 +85,6 @@ class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
         isProcessing: false
       });
     }
-
-    const postUrl = process.env.REACT_APP_POST_URL;
-    if (postUrl == null) {
-      console.error("POST先のURLが指定されていません");
-      window.alert("送信に失敗しました");
-      return;
-    }
-
-    axios.post(postUrl, formData, {
-      headers: {
-        'content-type': 'multipart/form-data'
-      }
-    })
-      .then(() => {
-        console.log("post request success");
-        window.alert("送信に成功しました");
-      })
-      .catch((error) => {
-        console.log(error);
-        window.alert("送信に失敗しました");
-      });
-
   }
 
   render() {
@@ -143,4 +109,4 @@ class MovieForm extends React.Component<{}, convertVideoToAudioStateInterface> {
   }
 }
 
-export default MovieForm;
+export default App;
