@@ -19,9 +19,8 @@ class App extends React.Component<{}, convertVideoToAudioStateInterface> {
     this.state = { progress: 0, isProcessing: false };
     if (process.env.REACT_APP_POST_URL == null) {
       throw new Error('リクエスト先URLの取得に失敗しました');
-    } else {
-      this.requestUrl = process.env.REACT_APP_POST_URL;
     }
+    this.requestUrl = process.env.REACT_APP_POST_URL;
   }
 
   componentDidMount() {
