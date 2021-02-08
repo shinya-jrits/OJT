@@ -52,7 +52,7 @@ export class Express {
                 onFinish,
                 onError,
                 this.bucketName,
-                new Storage()
+                this.storage
             );
             res.send("success");
         });
