@@ -1,8 +1,9 @@
 import { getSecretValue } from '#/SecretManager'
 import { Express } from '#/Express';
-import { Storage } from '@google-cloud/storage';
+import { Storage as googleStorage } from '@google-cloud/storage';
 import { SendMail } from './sendMail';
 import express from 'express'
+import { Storage } from '#/Storage';
 
 (async () => {
     const fromAddress = await getSecretValue('send_email_address');
@@ -19,8 +20,7 @@ import express from 'express'
     }
     const expressClass = new Express(
         express(),
-        new Storage(),
-        bucketName,
+        new Storage(new googleStorage, bucketName),
         new SendMail(sendGridApiKey, fromAddress),
     );
     expressClass.start();
