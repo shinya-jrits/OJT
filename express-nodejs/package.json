@@ -26,10 +26,7 @@
     "ts-node-dev": "^1.0.0"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "ts-node --files -r tsconfig-paths/register src/index.ts",
-    "dev:watch": "ts-node-dev  src/index.ts",
-    "gcp-build": "tsc"
+    "start": "ts-node --files -r tsconfig-paths/register src/index.ts"
   },
   "author": "",
   "license": "ISC"
