@@ -5,6 +5,7 @@ import { SendMail } from '#/sendMail'
 import { speechToText } from '#/speechToText'
 import Speech from '@google-cloud/speech'
 import { Storage } from '@google-cloud/storage'
+import { deleteFileToGCS } from './deleteFileToGCS'
 
 export class Express {
     /**
@@ -34,13 +35,17 @@ export class Express {
         const upload = multer({ storage: multer.memoryStorage() });
         this.app.post('/api/', upload.single('file'), (req: express.Request, res: express.Response) => {
             const onFinish = ((fileName: string) => {
-                speechToText(fileName, this.bucketName, new Speech.v1p1beta1.SpeechClient()).then((result) => {
-                    if (result === null) {
-                        this.sendMail.sendMail(req.body.text, "文字を検出できませんでした");
-                    } else {
-                        this.sendMail.sendMail(req.body.text, "文字起こしが完了しました。添付ファイルをご確認ください。", result);
-                    }
-                })
+                speechToText(fileName, this.bucketName, new Speech.v1p1beta1.SpeechClient())
+                    .then((result) => {
+                        if (result === null) {
+                            this.sendMail.sendMail(req.body.text, "文字を検出できませんでした");
+                        } else {
+                            this.sendMail.sendMail(req.body.text, "文字起こしが完了しました。添付ファイルをご確認ください。", result);
+                        }
+                    })
+                    .finally(() => {
+                        deleteFileToGCS(this.bucketName, fileName, this.storage);
+                    })
             });
             const onError = ((err: Error) => {
                 console.error(err);
