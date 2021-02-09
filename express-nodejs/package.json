@@ -27,10 +27,9 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "ts-node --files -r tsconfig-paths/register src/index.ts",
+    "start": "ts-node --files -r tsconfig-paths/register src/index.ts",
     "dev:watch": "ts-node-dev  src/index.ts",
-    "gcp-build": "tsc",
-    "start": "node src/index.js"
+    "gcp-build": "tsc"
   },
   "author": "",
   "license": "ISC"
