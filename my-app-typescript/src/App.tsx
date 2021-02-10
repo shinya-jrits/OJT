@@ -91,6 +91,7 @@ class App extends React.Component<{}, convertVideoToAudioStateInterface> {
     return (
       <div>
         <h1>OJTテーマ：Teams会議の文字起こしツール</h1>
+        <h3 style={{ color: 'red' }}>※R-WANから接続してください</h3>
         <form onSubmit={this.handleSubmit}>
           <p>
             <label>メールアドレス:<input type="email" minLength={1} name="mail" onChange={this.handleChange} /></label>
