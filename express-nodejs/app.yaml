@@ -7,4 +7,4 @@ basic_scaling:
   idle_timeout: 30m
 
 env_variables:
-  ALLOW_ORIGIN: "https://storage.googleapis.com/"
+  ALLOW_ORIGIN: "https://storage.googleapis.com"
