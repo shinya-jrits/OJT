@@ -14,71 +14,40 @@ const mockLROperation = {
 
 mockLongRunningRecognize.mockResolvedValue([mockLROperation]);
 
+function generateILongRunningRecognizeResponse(transcripts: string[]): { results: {}[]; } {
+    const mockILongRunningRecognizeResponse = { results: [{}] };
+    transcripts.forEach(res => {
+        mockILongRunningRecognizeResponse.results.push({ alternatives: [{ transcript: res }] })
+    });
+    return mockILongRunningRecognizeResponse;
+}
+
 describe('speechToText', () => {
     it('文字起こしに成功', async () => {
-        const mockILongRunningRecognizeResponse = {
-            results: [
-                {
-                    alternatives: [
-                        {
-                            transcript: "hogehoge"
-                        }
-                    ]
-                }
-            ]
-        };
-        mockPromise.mockResolvedValue([mockILongRunningRecognizeResponse]);
+        mockPromise.mockResolvedValue([generateILongRunningRecognizeResponse(["hogehoge"])]);
         const resultSpeechToText = await speechToText('fileName', 'bucketName',
             mockSpeechClient as unknown as v1p1beta1.SpeechClient);
         expect(resultSpeechToText).toBe("hogehoge");
     });
 
     it('複数行の文字起こしに成功', async () => {
-        const mockILongRunningRecognizeResponse = {
-            results: [
-                {
-                    alternatives: [
-                        {
-                            transcript: "いい天気ですね。"
-                        }
-                    ]
-                },
-                {
-                    alternatives: [
-                        {
-                            transcript: "そうですね。"
-                        }
-                    ]
-                }
-            ]
-        };
-        mockPromise.mockResolvedValue([mockILongRunningRecognizeResponse]);
+        mockPromise.mockResolvedValue(
+            [generateILongRunningRecognizeResponse(["いい天気ですね。", "そうですね。"])]
+        );
         const resultSpeechToText = await speechToText('fileName', 'bucketName',
             mockSpeechClient as unknown as v1p1beta1.SpeechClient);
         expect(resultSpeechToText).toBe("いい天気ですね。\nそうですね。");
     });
 
     it('文字を検出できない', async () => {
-        const mockILongRunningRecognizeResponse = {
-            results: [
-                {
-                    alternatives: [
-                        {
-                            transcript: ""
-                        }
-                    ]
-                }
-            ]
-        };
-        mockPromise.mockResolvedValue([mockILongRunningRecognizeResponse]);
+        mockPromise.mockResolvedValue([generateILongRunningRecognizeResponse([""])]);
         const resultSpeechToText = await speechToText('fileName', 'bucketName',
             mockSpeechClient as unknown as v1p1beta1.SpeechClient);
         expect(resultSpeechToText).toBeNull;
     });
 
     it('文字起こしに失敗', async () => {
-        const mockILongRunningRecognizeResponse = {};
-        mockPromise.mockResolvedValue([mockILongRunningRecognizeResponse]);
+        mockPromise.mockResolvedValue([{}]);
         const resultSpeechToText = await speechToText('fileName', 'bucketName',
             mockSpeechClient as unknown as v1p1beta1.SpeechClient);
         expect(resultSpeechToText).toBeNull;
