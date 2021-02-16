@@ -6,23 +6,17 @@ import axios from 'axios';
  * @param audioFile 文字起こしするオーディオファイル
  * @param requestUrl 送信先のURL
  */
-export function requestTranscription(emailAddress: string, audioFile: Blob, requestUrl: string) {
+export async function requestTranscription(emailAddress: string, audioFile: Blob, requestUrl: string) {
     const formData = new FormData;
     formData.append("text", emailAddress);
     formData.append("file", audioFile);
 
-    axios.post(requestUrl, formData, {
+    await axios.post(requestUrl, formData, {
         headers: {
             'content-type': 'multipart/form-data'
         }
-    })
-        .then(() => {
-            console.log("post request success");
-            window.alert("送信に成功しました");
-        })
-        .catch((error) => {
-            console.log(error);
-            window.alert("送信に失敗しました");
-        });
+    });
+    console.log("送信に成功しました");
+    window.alert("送信に成功しました");
 
 }
