@@ -95,6 +95,7 @@ class App extends React.Component<{}, convertVideoToAudioStateInterface> {
       await requestTranscription(this.state.emailAddress, audioBlob, this.requestUrl);
     }
     catch (error) {
+      console.error(error);
       window.alert("メールの送信に失敗しました");
     } finally {
       this.setState({
