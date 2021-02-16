@@ -32,6 +32,7 @@ describe('speechToText', () => {
             mockSpeechClient as unknown as v1p1beta1.SpeechClient);
         expect(resultSpeechToText).toBe("hogehoge");
     });
+
     it('複数行の文字起こしに成功', async () => {
         const mockILongRunningRecognizeResponse = {
             results: [
@@ -56,6 +57,7 @@ describe('speechToText', () => {
             mockSpeechClient as unknown as v1p1beta1.SpeechClient);
         expect(resultSpeechToText).toBe("いい天気ですね。\nそうですね。");
     });
+
     it('文字を検出できない', async () => {
         const mockILongRunningRecognizeResponse = {
             results: [
@@ -73,6 +75,7 @@ describe('speechToText', () => {
             mockSpeechClient as unknown as v1p1beta1.SpeechClient);
         expect(resultSpeechToText).toBeNull;
     });
+
     it('文字起こしに失敗', async () => {
         const mockILongRunningRecognizeResponse = {};
         mockPromise.mockResolvedValue([mockILongRunningRecognizeResponse]);
