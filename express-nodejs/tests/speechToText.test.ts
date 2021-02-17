@@ -14,12 +14,23 @@ const mockLROperation = {
 
 mockLongRunningRecognize.mockResolvedValue([mockLROperation]);
 
-function generateILongRunningRecognizeResponse(transcripts: string[]): { results: {}[]; } {
-    const mockILongRunningRecognizeResponse = { results: [{}] };
-    transcripts.forEach(res => {
-        mockILongRunningRecognizeResponse.results.push({ alternatives: [{ transcript: res }] })
-    });
-    return mockILongRunningRecognizeResponse;
+interface LongRunningRecognizeResponse {
+    results: { alternatives: { transcript: string }[] }[];
+}
+
+function generateILongRunningRecognizeResponse(transcripts: string[])
+    : LongRunningRecognizeResponse {
+    return {
+        results: transcripts.map(t => {
+            return {
+                alternatives: [
+                    {
+                        transcript: t
+                    }
+                ]
+            }
+        })
+    }
 }
 
 describe('speechToText', () => {
