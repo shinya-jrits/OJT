@@ -5,10 +5,12 @@ import { convertVideoToAudio } from './convertVideoToAudio'
 import { requestTranscription } from './requestTranscription'
 import { assertIsSingle } from './assertIsSingle'
 import './App.css'
+import { isRWAN } from './isRWAN'
 
 interface convertVideoToAudioStateInterface {
   progress: number;
   isProcessing: boolean;
+  isRWAN: boolean;
   videoFile?: File;
   emailAddress?: string;
 }
@@ -17,15 +19,18 @@ class App extends React.Component<{}, convertVideoToAudioStateInterface> {
   requestUrl: string;
   constructor() {
     super({});
-    this.state = { progress: 0, isProcessing: false };
+    this.state = { progress: 0, isProcessing: false, isRWAN: true };
     if (process.env.REACT_APP_POST_URL == null) {
       throw new Error('リクエスト先URLの取得に失敗しました');
     }
     this.requestUrl = process.env.REACT_APP_POST_URL;
   }
 
-  componentDidMount() {
+  async componentDidMount() {
     document.title = 'Teams会議の文字起こしツール';
+    this.setState({
+      isRWAN: await isRWAN()
+    });
   }
 
   /**
@@ -92,24 +97,28 @@ class App extends React.Component<{}, convertVideoToAudioStateInterface> {
     return (
       <div>
         <h1>OJTテーマ：Teams会議の文字起こしツール</h1>
-        <h3 className="R-WAN">※R-WANから接続してください</h3>
-        <form onSubmit={this.handleSubmit}>
-          <p>
-            <label>メールアドレス:<input type="email" minLength={1} name="mail"
-              placeholder="info@example.com"
-              onChange={this.handleChange} /></label>
-          </p>
-          <p className="howToMessage">※結果を受け取るメールアドレスを入力してください</p>
-          <p>
-            <label>ファイル:<input type="file" accept="video/mp4" onChange={this.handleChange} /></label>
-          </p>
-          <p className="howToMessage">※1時間までのMP4ファイルを選択してください</p>
-          <input type="submit" value="送信" disabled={this.state.isProcessing} />
-          {this.state.isProcessing
-            ? <p><ProgressBar completed={this.state.progress} /></p>
-            : ''
-          }
-        </form>
+        {!this.state.isRWAN
+          ? <h3 className="R-WAN">※R-WANで接続してください</h3>
+          :
+
+          <form onSubmit={this.handleSubmit}>
+            <p>
+              <label>メールアドレス:<input type="email" minLength={1} name="mail"
+                placeholder="info@example.com"
+                onChange={this.handleChange} /></label>
+            </p>
+            <p className="howToMessage">※結果を受け取るメールアドレスを入力してください</p>
+            <p>
+              <label>ファイル:<input type="file" accept="video/mp4" onChange={this.handleChange} /></label>
+            </p>
+            <p className="howToMessage">※1時間までのMP4ファイルを選択してください</p>
+            <input type="submit" value="送信" disabled={this.state.isProcessing} />
+            {this.state.isProcessing
+              ? <p><ProgressBar completed={this.state.progress} /></p>
+              : ''
+            }
+          </form>
+        }
       </div>
     );
   }
