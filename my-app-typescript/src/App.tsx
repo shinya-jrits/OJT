@@ -103,13 +103,12 @@ class App extends React.Component<{}, convertVideoToAudioStateInterface> {
 
           <form onSubmit={this.handleSubmit}>
             <p>
-              <label>メールアドレス:<input type="email" minLength={1} name="mail"
+              <label>結果を受け取るメールアドレス:<input type="email" minLength={1} name="mail"
                 placeholder="info@example.com"
                 onChange={this.handleChange} /></label>
             </p>
-            <p className="howToMessage">※結果を受け取るメールアドレスを入力してください</p>
             <p>
-              <label>ファイル:<input type="file" accept="video/mp4" onChange={this.handleChange} /></label>
+              <label>文字起こしを行う動画ファイル:<input type="file" accept="video/mp4" onChange={this.handleChange} /></label>
             </p>
             <p className="howToMessage">※1時間までのMP4ファイルを選択してください</p>
             <input type="submit" value="送信" disabled={this.state.isProcessing} />
