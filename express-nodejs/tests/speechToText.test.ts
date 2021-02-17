@@ -25,12 +25,12 @@ function generateILongRunningRecognizeResponse(transcripts: string[])
             return {
                 alternatives: [
                     {
-                        transcript: t
-                    }
-                ]
-            }
-        })
-    }
+                        transcript: t,
+                    },
+                ],
+            };
+        }),
+    };
 }
 
 describe('speechToText', () => {
