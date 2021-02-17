@@ -23,14 +23,11 @@
     "uuid": "^8.3.1"
   },
   "devDependencies": {
-    "ts-node-dev": "^1.0.0"
+    "ts-node-dev": "^1.1.1"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "ts-node --files -r tsconfig-paths/register src/index.ts",
-    "dev:watch": "ts-node-dev  src/index.ts",
-    "gcp-build": "tsc",
-    "start": "node src/index.js"
+    "start": "ts-node --files -r tsconfig-paths/register src/index.ts",
+    "dev": "ts-node-dev --files -r tsconfig-paths/register src/index.ts"
   },
   "author": "",
   "license": "ISC"
