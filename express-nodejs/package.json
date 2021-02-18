@@ -30,10 +30,8 @@
   },
   "scripts": {
     "test": "jest",
-    "dev": "ts-node --files -r tsconfig-paths/register src/index.ts",
-    "dev:watch": "ts-node-dev  src/index.ts",
-    "gcp-build": "tsc",
-    "start": "node src/index.js"
+    "start": "ts-node --files -r tsconfig-paths/register src/index.ts",
+    "dev": "ts-node-dev --files -r tsconfig-paths/register src/index.ts"
   },
   "author": "",
   "license": "ISC",
@@ -55,3 +53,4 @@
     ]
   }
 }
+
