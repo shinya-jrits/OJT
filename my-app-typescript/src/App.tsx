@@ -7,8 +7,9 @@ import { assertIsSingle } from './assertIsSingle'
 import './App.css'
 
 interface convertVideoToAudioStateInterface {
-  progress: number | string;
+  progress: number;
   isProcessing: boolean;
+  message?: string
   videoFile?: File;
   emailAddress?: string;
 }
@@ -70,15 +71,9 @@ class App extends React.Component<{}, convertVideoToAudioStateInterface> {
       isProcessing: true
     });
     ffmpeg.setProgress(({ ratio }) => {
-      if (ratio == 1) {
-        this.setState({
-          progress: "送信中"
-        })
-      } else {
-        this.setState({
-          progress: Math.round(100 * ratio)
-        });
-      }
+      this.setState({
+        progress: Math.round(100 * ratio)
+      });
     });
     let audioBlob: Blob;
     try {
@@ -92,6 +87,9 @@ class App extends React.Component<{}, convertVideoToAudioStateInterface> {
       return;
     }
     try {
+      this.setState({
+        message: "~送信中~"
+      })
       await requestTranscription(this.state.emailAddress, audioBlob, this.requestUrl);
       console.log("送信に成功しました");
       window.alert("送信に成功しました");
@@ -101,7 +99,8 @@ class App extends React.Component<{}, convertVideoToAudioStateInterface> {
       window.alert("送信に失敗しました");
     } finally {
       this.setState({
-        isProcessing: false
+        isProcessing: false,
+        message: ""
       });
     }
   }
@@ -127,6 +126,7 @@ class App extends React.Component<{}, convertVideoToAudioStateInterface> {
             ? <p><ProgressBar completed={this.state.progress} /></p>
             : ''
           }
+          <p className="message">{this.state.message}</p>
         </form>
       </div>
     );
