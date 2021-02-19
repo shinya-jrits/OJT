@@ -9,6 +9,7 @@ import './App.css'
 interface convertVideoToAudioStateInterface {
   progress: number;
   isProcessing: boolean;
+  message?: string
   videoFile?: File;
   emailAddress?: string;
 }
@@ -74,16 +75,32 @@ class App extends React.Component<{}, convertVideoToAudioStateInterface> {
         progress: Math.round(100 * ratio)
       });
     });
+    let audioBlob: Blob;
     try {
-      const audioBlob: Blob = await convertVideoToAudio(this.state.videoFile, ffmpeg);
-      requestTranscription(this.state.emailAddress, audioBlob, this.requestUrl);
+      audioBlob = await convertVideoToAudio(this.state.videoFile, ffmpeg);
     } catch (error) {
       window.alert('ファイルの変換に失敗しました');
-      console.error(error);
-      return;
-    } finally {
       this.setState({
         isProcessing: false
+      });
+      console.error(error);
+      return;
+    }
+    try {
+      this.setState({
+        message: "~送信中~"
+      })
+      await requestTranscription(this.state.emailAddress, audioBlob, this.requestUrl);
+      console.log("送信に成功しました");
+      window.alert("送信に成功しました");
+    }
+    catch (error) {
+      console.error(error);
+      window.alert("送信に失敗しました");
+    } finally {
+      this.setState({
+        isProcessing: false,
+        message: ""
       });
     }
   }
@@ -109,6 +126,7 @@ class App extends React.Component<{}, convertVideoToAudioStateInterface> {
             ? <p><ProgressBar completed={this.state.progress} /></p>
             : ''
           }
+          <p className="message">{this.state.message}</p>
         </form>
       </div>
     );
