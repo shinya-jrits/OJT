@@ -1,5 +1,4 @@
 import { FFmpeg, fetchFile } from "@ffmpeg/ffmpeg";
-import { readFile } from "fs";
 
 /**
  * 動画ファイルを音声ファイルに変換する
