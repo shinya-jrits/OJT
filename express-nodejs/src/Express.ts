@@ -4,6 +4,9 @@ import { SendMail } from '#/sendMail'
 import { speechToText } from '#/speechToText'
 import Speech from '@google-cloud/speech'
 import { Storage } from '#/Storage'
+import dotenv from 'dotenv'
+
+dotenv.config();
 
 export class Express {
     /**
@@ -18,7 +21,9 @@ export class Express {
         private readonly sendMail: SendMail
     ) {
         this.app.use(function (req, res, next) {
-            res.header('Access-Control-Allow-Origin', '*');
+
+            //バックエンドへのアクセス自体にはGAEでファイアウォールを設定している
+            res.header('Access-Control-Allow-Origin', process.env.ALLOW_ORIGIN);
             res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
             next();
         });
