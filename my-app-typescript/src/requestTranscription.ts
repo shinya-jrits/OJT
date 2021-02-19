@@ -16,7 +16,4 @@ export async function requestTranscription(emailAddress: string, audioFile: Blob
             'content-type': 'multipart/form-data'
         }
     });
-    console.log("送信に成功しました");
-    window.alert("送信に成功しました");
-
 }
