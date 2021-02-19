@@ -96,7 +96,7 @@ class App extends React.Component<{}, convertVideoToAudioStateInterface> {
     }
     catch (error) {
       console.error(error);
-      window.alert("メールの送信に失敗しました");
+      window.alert("送信に失敗しました");
     } finally {
       this.setState({
         isProcessing: false
