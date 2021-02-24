@@ -101,7 +101,8 @@ class App extends React.Component<{}, convertVideoToAudioStateInterface> {
       })
       await requestTranscription(this.state.emailAddress, audioBlob, this.requestUrl);
       console.log("送信に成功しました");
-      window.alert("送信に成功しました");
+      window.alert("送信に成功しました。\n文字起こし結果が " + this.state.emailAddress
+        + " に送られますのでご確認ください。\n" + "送信には動画時間の半分程度かかります。");
     }
     catch (error) {
       console.error(error);
