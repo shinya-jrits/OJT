@@ -10,7 +10,7 @@ import { isRWAN } from './isRWAN'
 interface convertVideoToAudioStateInterface {
   progress: number;
   isProcessing: boolean;
-  isRWAN?: boolean;
+  drawForm?: boolean;
   message?: string
   videoFile?: File;
   emailAddress?: string;
@@ -30,8 +30,11 @@ class App extends React.Component<{}, convertVideoToAudioStateInterface> {
 
   async componentDidMount() {
     document.title = 'Teams会議の文字起こしツール';
+
     this.setState({
-      isRWAN: await isRWAN()
+      drawForm: process.env.NODE_ENV === "development"
+        ? true
+        : await isRWAN()
     });
   }
 
@@ -134,11 +137,11 @@ class App extends React.Component<{}, convertVideoToAudioStateInterface> {
   }
 
   render() {
-    if (this.state.isRWAN == null) return <p>Loading page...</p>;
+    if (this.state.drawForm == null) return <p>Loading page...</p>;
     return (
       <div>
         <h1>OJTテーマ：Teams会議の文字起こしツール</h1>
-        {this.state.isRWAN
+        {this.state.drawForm
           ? <this.uploadForm />
           : <h3 className="R-WAN">※R-WANで接続してください</h3>
         }
