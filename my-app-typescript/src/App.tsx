@@ -6,6 +6,7 @@ import { requestTranscription } from './requestTranscription'
 import { assertIsSingle } from './assertIsSingle'
 import './App.css'
 import { isRWAN } from './isRWAN'
+import { getRequestUrl } from './getRequestUrl'
 
 interface convertVideoToAudioStateInterface {
   progress: number;
@@ -22,10 +23,7 @@ class App extends React.Component<{}, convertVideoToAudioStateInterface> {
     super({});
     this.uploadForm = this.uploadForm.bind(this);
     this.state = { progress: 0, isProcessing: false };
-    if (process.env.REACT_APP_POST_URL == null) {
-      throw new Error('リクエスト先URLの取得に失敗しました');
-    }
-    this.requestUrl = process.env.REACT_APP_POST_URL;
+    this.requestUrl = getRequestUrl();
   }
 
   async componentDidMount() {
