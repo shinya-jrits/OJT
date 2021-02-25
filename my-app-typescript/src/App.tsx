@@ -65,11 +65,15 @@ class App extends React.Component<{}, convertVideoToAudioStateInterface> {
   handleSubmit = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();//ページ遷移を防ぐため
     if (this.state.emailAddress == null || this.state.emailAddress === "") {
-      window.alert("メールアドレスを入力してください");
+      this.setState({
+        message: "メールアドレスを入力してください"
+      });
       return;
     }
     if (this.state.videoFile == null) {
-      window.alert("ファイルを選択してください");
+      this.setState({
+        message: "ファイルを選択してください"
+      });
       return;
     }
     const ffmpeg = createFFmpeg({
@@ -77,7 +81,8 @@ class App extends React.Component<{}, convertVideoToAudioStateInterface> {
     });
     this.setState({
       progress: 0,
-      isProcessing: true
+      isProcessing: true,
+      message: ""
     });
     ffmpeg.setProgress(({ ratio }) => {
       this.setState({
@@ -88,9 +93,9 @@ class App extends React.Component<{}, convertVideoToAudioStateInterface> {
     try {
       audioBlob = await convertVideoToAudio(this.state.videoFile, ffmpeg);
     } catch (error) {
-      window.alert('ファイルの変換に失敗しました');
       this.setState({
-        isProcessing: false
+        isProcessing: false,
+        message: "ファイルの変換に失敗しました"
       });
       console.error(error);
       return;
@@ -101,15 +106,19 @@ class App extends React.Component<{}, convertVideoToAudioStateInterface> {
       })
       await requestTranscription(this.state.emailAddress, audioBlob, this.requestUrl);
       console.log("送信に成功しました");
-      window.alert("送信に成功しました");
+      this.setState({
+        message: "送信に成功しました。文字起こし結果は " + this.state.emailAddress
+          + " に送られます。\n" + "結果の返信には動画時間の半分程度かかりますが、ブラウザは閉じて構いません。"
+      });
     }
     catch (error) {
       console.error(error);
-      window.alert("送信に失敗しました");
+      this.setState({
+        message: "送信に失敗しました。"
+      });
     } finally {
       this.setState({
         isProcessing: false,
-        message: ""
       });
     }
   }
@@ -131,7 +140,11 @@ class App extends React.Component<{}, convertVideoToAudioStateInterface> {
           ? <p><ProgressBar completed={this.state.progress} /></p>
           : ''
         }
-        <p className="message">{this.state.message}</p>
+        <div className="message">{
+          this.state.message?.split('\n').map((str, index) => (
+            <React.Fragment key={index}>{str}<br /></React.Fragment>
+          ))
+        }</div>
       </form>
     )
   }
