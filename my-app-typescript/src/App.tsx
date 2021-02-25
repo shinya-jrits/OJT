@@ -108,7 +108,7 @@ class App extends React.Component<{}, convertVideoToAudioStateInterface> {
       console.log("送信に成功しました");
       this.setState({
         message: "送信に成功しました。文字起こし結果は " + this.state.emailAddress
-          + " に送られます。" + "送信には動画時間の半分程度かかります。"
+          + " に送られます。\n" + "結果の返信には動画時間の半分程度かかりますが、ブラウザは閉じて構いません。"
       });
     }
     catch (error) {
@@ -140,7 +140,11 @@ class App extends React.Component<{}, convertVideoToAudioStateInterface> {
           ? <p><ProgressBar completed={this.state.progress} /></p>
           : ''
         }
-        <p className="message">{this.state.message}</p>
+        <div className="message">{
+          this.state.message?.split('\n').map((str, index) => (
+            <React.Fragment key={index}>{str}<br /></React.Fragment>
+          ))
+        }</div>
       </form>
     )
   }
