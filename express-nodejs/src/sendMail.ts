@@ -20,7 +20,7 @@ export class SendMail {
      * @param mailText メール本文
      * @param attachment テキストファイルで添付する文字列
      */
-    async sendMail(toAddress: string, mailText: string, attachment?: string) {
+    async sendMail(toAddress: string, mailText: string, attachment?: string):Promise<void> {
         const msg = {
             to: toAddress,
             from: this.fromAddress,
