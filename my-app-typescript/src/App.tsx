@@ -100,6 +100,13 @@ class App extends React.Component<{}, convertVideoToAudioStateInterface> {
       console.error(error);
       return;
     }
+    if (audioBlob.size > 30 * 1024 * 1024) {
+      this.setState({
+        isProcessing: false,
+        message: "容量が大きすぎます。もっと短い動画ファイルを変換してください"
+      })
+      return;
+    }
     try {
       this.setState({
         message: "~送信中~"
