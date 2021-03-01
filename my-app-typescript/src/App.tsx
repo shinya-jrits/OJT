@@ -1,11 +1,11 @@
 import React from 'react';
-import { createFFmpeg } from '@ffmpeg/ffmpeg';
+import {createFFmpeg} from '@ffmpeg/ffmpeg';
 import ProgressBar from '@ramonak/react-progress-bar';
-import { convertVideoToAudio } from './convertVideoToAudio'
-import { requestTranscription } from './requestTranscription'
-import { assertIsSingle } from './assertIsSingle'
+import {convertVideoToAudio} from './convertVideoToAudio'
+import {requestTranscription} from './requestTranscription'
+import {assertIsSingle} from './assertIsSingle'
 import './App.css'
-import { isRWAN } from './isRWAN'
+import {isRWAN} from './isRWAN'
 
 interface convertVideoToAudioStateInterface {
   progress: number;
@@ -16,7 +16,7 @@ interface convertVideoToAudioStateInterface {
   emailAddress?: string;
 }
 
-class App extends React.Component<{}, convertVideoToAudioStateInterface> {
+class App extends React.Component<unknown, convertVideoToAudioStateInterface> {
   requestUrl: string;
   constructor() {
     super({});
@@ -28,7 +28,7 @@ class App extends React.Component<{}, convertVideoToAudioStateInterface> {
     this.requestUrl = process.env.REACT_APP_POST_URL;
   }
 
-  async componentDidMount() {
+  async componentDidMount():Promise<void> {
     document.title = 'Teams会議の文字起こしツール';
 
     this.setState({
@@ -114,8 +114,8 @@ class App extends React.Component<{}, convertVideoToAudioStateInterface> {
       await requestTranscription(this.state.emailAddress, audioBlob, this.requestUrl);
       console.log("送信に成功しました");
       this.setState({
-        message: "送信に成功しました。文字起こし結果は " + this.state.emailAddress
-          + " に送られます。\n" + "結果の返信には動画時間の半分程度かかりますが、ブラウザは閉じて構いません。"
+        message: `送信に成功しました。文字起こし結果は ${this.state.emailAddress} に送られます。
+              結果の返信には動画時間の半分程度かかりますが、ブラウザは閉じて構いません。`
       });
     }
     catch (error) {
@@ -130,7 +130,7 @@ class App extends React.Component<{}, convertVideoToAudioStateInterface> {
     }
   }
 
-  uploadForm() {
+  uploadForm():JSX.Element {
     return (
       <form onSubmit={this.handleSubmit}>
         <p>
@@ -156,7 +156,7 @@ class App extends React.Component<{}, convertVideoToAudioStateInterface> {
     )
   }
 
-  render() {
+  render():JSX.Element {
     if (this.state.drawForm == null) return <p>Loading page...</p>;
     return (
       <div>
