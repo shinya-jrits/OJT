@@ -34,7 +34,7 @@ export async function speechToText(
         return response.results
             .filter(result => result.alternatives != null)
             //fiterでnullチェックをしているのでeslintを無視する
-            // eslint-disable-next-line 
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             .map(result => result.alternatives![0].transcript).join('\n');
     }
 }
