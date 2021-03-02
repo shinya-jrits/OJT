@@ -1,5 +1,4 @@
-import { v1p1beta1 } from '@google-cloud/speech'
-import { response } from 'express';
+import { v1p1beta1 } from '@google-cloud/speech';
 
 /**
  * GoogleSpeechToTextで文字起こしを行う
@@ -34,6 +33,8 @@ export async function speechToText(
         console.log("文字起こしが完了しました");
         return response.results
             .filter(result => result.alternatives != null)
+            //fiterでnullチェックをしているのでeslintを無視する
+            // eslint-disable-next-line 
             .map(result => result.alternatives![0].transcript).join('\n');
     }
 }
