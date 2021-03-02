@@ -121,10 +121,24 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
       });
     }
     catch (error) {
-      console.error(error);
-      this.setState({
-        message: "送信に失敗しました。"
-      });
+      if (error.response != null) {
+        console.log(error.response.status);
+        this.setState({
+          message: `${error.response.status} (${error.response.statusText}) 送信に失敗しました。
+          開発者に問い合わせてください。`
+        });
+      } else if (await isRWAN()) {
+        this.setState({
+          message:'送信に失敗しました。R-WANで接続しているか確認してください'
+        });
+      }
+        else {
+          this.setState({
+            message:`${error.message}　送信に失敗しました。
+            開発者に問い合わせてください。`
+          })
+      }
+      console.log(error.message);
     } finally {
       this.setState({
         isProcessing: false,
