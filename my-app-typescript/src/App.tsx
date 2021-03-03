@@ -130,7 +130,7 @@ class App extends React.Component<unknown, convertVideoToAudioStateInterface> {
     }
   }
 
-  uploadForm():JSX.Element {
+  uploadForm():React.ReactNode {
     return (
       <form onSubmit={this.handleSubmit}>
         <p>
@@ -156,13 +156,13 @@ class App extends React.Component<unknown, convertVideoToAudioStateInterface> {
     )
   }
 
-  render():JSX.Element {
+  render():React.ReactNode {
     if (this.state.drawForm == null) return <p>Loading page...</p>;
     return (
       <div>
         <h1>OJTテーマ：Teams会議の文字起こしツール</h1>
         {this.state.drawForm
-          ? <this.uploadForm />
+          ? this.uploadForm()
           : <h3 className="R-WAN">※R-WANで接続してください</h3>
         }
       </div>
