@@ -43,7 +43,7 @@ export class SendMail {
             await sendgrid.send(msg);
             console.log("send mail success");
         } catch (err) {
-            console.error(err.toString());
+            console.error(err);
         }
     }
 }
