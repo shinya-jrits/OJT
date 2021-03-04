@@ -16,7 +16,9 @@ interface convertVideoToAudioStateInterface {
   emailAddress?: string;
 }
 
-class App extends React.Component<Record<string, never>, convertVideoToAudioStateInterface> {
+type EmptyProps = Record<string, never>;
+
+class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface> {
   requestUrl: string;
   constructor() {
     super({});
