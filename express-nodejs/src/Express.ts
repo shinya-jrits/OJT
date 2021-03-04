@@ -36,9 +36,10 @@ export class Express {
         type ReqBody = {
             text:string
         }
+        type EmptyObject = Record<string, never>;
         const upload = multer({ storage: multer.memoryStorage() });
-        this.app.post('/api/', upload.single('file'), (req: express.Request<Record<string, never>,
-            Record<string, never>,ReqBody>, res: express.Response) => {
+        this.app.post('/api/', upload.single('file'), (req: express.Request<EmptyObject,
+            EmptyObject,ReqBody>, res: express.Response) => {
             const onFinish = ((fileName: string) => {
                 speechToText(fileName, this.storage.getBucketName(), new Speech.v1p1beta1.SpeechClient())
                     .then((result) => {
