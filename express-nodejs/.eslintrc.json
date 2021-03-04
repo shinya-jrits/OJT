@@ -1,0 +1,30 @@
+{
+    "env": {
+        "es2021": true,
+        "node": true
+    },
+    "extends": [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/recommended",
+        "plugin:@typescript-eslint/recommended-requiring-type-checking"
+    ],
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+        "sourceType": "module",
+        "project": "./tsconfig.json",
+        "tsconfigRootDir": "C:/Users/r23600199/OJT/express-nodejs"
+    },
+    "plugins": [
+        "@typescript-eslint"
+    ],
+    "rules": {
+        "linebreak-style" : [
+            "error",
+            "windows"
+      ],
+      "complexity" :[
+          "warn",
+          10
+      ]
+    }
+}

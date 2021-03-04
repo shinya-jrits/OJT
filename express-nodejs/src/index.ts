@@ -5,7 +5,7 @@ import { SendMail } from './sendMail';
 import express from 'express'
 import { Storage } from '#/Storage';
 
-(async () => {
+void (async () => {
     const fromAddress = await getSecretValue('send_email_address');
     const bucketName = await getSecretValue('meeting_voice_file_dir');
     const sendGridApiKey = await getSecretValue('sendgrid_api_key')

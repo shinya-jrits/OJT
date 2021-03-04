@@ -33,15 +33,20 @@ export class Express {
      * リクエストを受け取り文字起こしするメソッド
      */
     start(): void {
+        type ReqBody = {
+            text:string
+        }
+        type EmptyObject = Record<string, never>;
         const upload = multer({ storage: multer.memoryStorage() });
-        this.app.post('/api/', upload.single('file'), (req: express.Request, res: express.Response) => {
+        this.app.post('/api/', upload.single('file'), (req: express.Request<EmptyObject,
+            EmptyObject,ReqBody>, res: express.Response) => {
             const onFinish = ((fileName: string) => {
                 speechToText(fileName, this.storage.getBucketName(), new Speech.v1p1beta1.SpeechClient())
                     .then((result) => {
                         if (result === null) {
-                            this.sendMail.sendMail(req.body.text, "文字を検出できませんでした");
+                            void this.sendMail.sendMail(req.body.text, "文字を検出できませんでした");
                         } else {
-                            this.sendMail.sendMail(req.body.text, "文字起こしが完了しました。添付ファイルをご確認ください。", result);
+                            void this.sendMail.sendMail(req.body.text, "文字起こしが完了しました。添付ファイルをご確認ください。", result);
                         }
                     })
                     .finally(() => {
@@ -50,7 +55,7 @@ export class Express {
             });
             const onError = ((err: Error) => {
                 console.error(err);
-                this.sendMail.sendMail(req.body.text, "文字起こしに失敗しました。");
+                void this.sendMail.sendMail(req.body.text, "文字起こしに失敗しました。");
             });
 
             this.storage.upload(

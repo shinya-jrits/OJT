@@ -6,7 +6,7 @@ import axios from 'axios';
  * @param audioFile 文字起こしするオーディオファイル
  * @param requestUrl 送信先のURL
  */
-export async function requestTranscription(emailAddress: string, audioFile: Blob, requestUrl: string) {
+export async function requestTranscription(emailAddress: string, audioFile: Blob, requestUrl: string):Promise<void> {
     const formData = new FormData;
     formData.append("text", emailAddress);
     formData.append("file", audioFile);

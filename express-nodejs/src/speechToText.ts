@@ -1,4 +1,4 @@
-import { v1p1beta1 } from '@google-cloud/speech'
+import { v1p1beta1 } from '@google-cloud/speech';
 
 /**
  * GoogleSpeechToTextで文字起こしを行う
@@ -22,17 +22,19 @@ export async function speechToText(
 
     const [operation] = await client.longRunningRecognize(request);
 
-    const [responese] = await operation.promise();
-    if (responese.results == null) {
+    const [response] = await operation.promise();
+    if (response.results == null) {
         console.error("文字起こしに失敗しました");
         return null;
-    } else if (responese.results.length === 0) {
+    } else if (response.results.length === 0) {
         console.log("文字を検出できませんでした。");
         return null;
     } else {
         console.log("文字起こしが完了しました");
-        return responese.results
-            .filter(resutlt => resutlt.alternatives != null)
+        return response.results
+            .filter(result => result.alternatives != null)
+            //fiterでnullチェックをしているのでeslintを無視する
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             .map(result => result.alternatives![0].transcript).join('\n');
     }
 }
