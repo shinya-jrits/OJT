@@ -12,6 +12,9 @@
     ],
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
+        "ecmaFeatures": {
+            "jsx": true
+        },
         "sourceType": "module",
         "project": "./tsconfig.json",
         "tsconfigRootDir": "C:/Users/r23600199/OJT/my-app-typescript"
