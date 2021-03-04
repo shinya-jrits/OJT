@@ -13,7 +13,8 @@
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
         "sourceType": "module",
-        "project": "./tsconfig.json"
+        "project": "./tsconfig.json",
+        "tsconfigRootDir": "C:/Users/r23600199/OJT/my-app-typescript"
     },
     "plugins": [
         "react",
