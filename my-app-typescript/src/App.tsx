@@ -132,7 +132,7 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
     }
   }
 
-  uploadForm():React.ReactNode {
+  uploadForm():React.ReactElement {
     return (
       <form onSubmit={this.handleSubmit}>
         <p>
@@ -158,13 +158,13 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
     )
   }
 
-  render():React.ReactNode {
+  render():React.ReactElement {
     if (this.state.drawForm == null) return <p>Loading page...</p>;
     return (
       <div>
         <h1>OJTテーマ：Teams会議の文字起こしツール</h1>
         {this.state.drawForm
-          ? this.uploadForm()
+          ? <this.uploadForm />
           : <h3 className="R-WAN">※R-WANで接続してください</h3>
         }
       </div>
