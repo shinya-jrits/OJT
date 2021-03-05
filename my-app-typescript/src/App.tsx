@@ -6,6 +6,7 @@ import {requestTranscription} from './requestTranscription'
 import {assertIsSingle} from './assertIsSingle'
 import './App.css'
 import {isRWAN} from './isRWAN'
+import{ AxiosError } from 'axios';
 
 interface convertVideoToAudioStateInterface {
   progress: number;
@@ -119,18 +120,17 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
         message: `送信に成功しました。文字起こし結果は ${this.state.emailAddress} に送られます。
               結果の返信には動画時間の半分程度かかりますが、ブラウザは閉じて構いません。`
       });
-    }
-    catch (error) {
+    } catch (error) {
       if (process.env.NODE_ENV === "development") {
           this.setState({
-            message:`${error.message}　送信に失敗しました。
+            message:`${error.message} 送信に失敗しました。
             開発者に問い合わせてください。`
           });
       } 
       if (process.env.NODE_ENV === "production") {
         this.setState({
-          message:`${error.message}　送信に失敗しました。
-          ${await isRWAN() ?"開発者に問い合わせてください":"R-WANの接続を確認してください"}` 
+          message:`${error.message} 送信に失敗しました。R-WANの接続を確認してください。
+          開発者に問い合わせてください。` 
         });
       }
     } finally {
