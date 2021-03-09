@@ -119,12 +119,25 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
         message: `送信に成功しました。文字起こし結果は ${this.state.emailAddress} に送られます。
               結果の返信には動画時間の半分程度かかりますが、ブラウザは閉じて構いません。`
       });
-    }
-    catch (error) {
-      console.error(error);
-      this.setState({
-        message: "送信に失敗しました。"
-      });
+    } catch (error) {
+      if (error instanceof Error) {
+        if (process.env.NODE_ENV === "development") {
+          this.setState({
+             message:`${error.message} 送信に失敗しました。
+             開発者に問い合わせてください。`
+           });
+       } 
+       if (process.env.NODE_ENV === "production") {
+         this.setState({
+           message:`${error.message} 送信に失敗しました。R-WANの接続を確認してください。
+           開発者に問い合わせてください。` 
+         });
+       }
+      } else {
+        this.setState({
+          message:`送信に失敗しました。`
+        });
+      }  
     } finally {
       this.setState({
         isProcessing: false,
