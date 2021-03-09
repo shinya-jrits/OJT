@@ -6,7 +6,6 @@ import {requestTranscription} from './requestTranscription'
 import {assertIsSingle} from './assertIsSingle'
 import './App.css'
 import {isRWAN} from './isRWAN'
-import{ AxiosError } from 'axios';
 
 interface convertVideoToAudioStateInterface {
   progress: number;
