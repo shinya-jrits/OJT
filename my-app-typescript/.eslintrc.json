@@ -24,13 +24,17 @@
         "@typescript-eslint"
     ],
     "rules": {
-      "linebreak-style" : [
-          "error",
-          "windows"
-    ],
-    "complexity" :[
-        "warn",
-        10
-    ]
+        "linebreak-style": [
+            "error",
+            "windows"
+        ],
+        "complexity": [
+            "warn",
+            10
+        ],
+        "semi": [
+            "error",
+            "always"
+        ]
     }
 }
