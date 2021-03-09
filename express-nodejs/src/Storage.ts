@@ -1,5 +1,5 @@
-import { Storage as googleStorage } from '@google-cloud/storage'
-import { v4 as uuidv4 } from 'uuid'
+import { Storage as googleStorage } from '@google-cloud/storage';
+import { v4 as uuidv4 } from 'uuid';
 
 export class Storage {
     /**
@@ -49,7 +49,7 @@ export class Storage {
                 console.log("ファイルを削除しました");
             }).catch((err) => {
                 console.error(err);
-            })
+            });
     }
 
     /**

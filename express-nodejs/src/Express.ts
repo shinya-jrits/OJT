@@ -1,10 +1,10 @@
-import express from 'express'
-import multer from 'multer'
-import { SendMail } from '#/sendMail'
-import { speechToText } from '#/speechToText'
-import Speech from '@google-cloud/speech'
-import { Storage } from '#/Storage'
-import dotenv from 'dotenv'
+import express from 'express';
+import multer from 'multer';
+import { SendMail } from '#/sendMail';
+import { speechToText } from '#/speechToText';
+import Speech from '@google-cloud/speech';
+import { Storage } from '#/Storage';
+import dotenv from 'dotenv';
 
 dotenv.config();
 
@@ -34,12 +34,12 @@ export class Express {
      */
     start(): void {
         type ReqBody = {
-            text:string
+            text: string
         }
         type EmptyObject = Record<string, never>;
         const upload = multer({ storage: multer.memoryStorage() });
         this.app.post('/api/', upload.single('file'), (req: express.Request<EmptyObject,
-            EmptyObject,ReqBody>, res: express.Response) => {
+            EmptyObject, ReqBody>, res: express.Response) => {
             const onFinish = ((fileName: string) => {
                 speechToText(fileName, this.storage.getBucketName(), new Speech.v1p1beta1.SpeechClient())
                     .then((result) => {
@@ -51,7 +51,7 @@ export class Express {
                     })
                     .finally(() => {
                         this.storage.delete(fileName);
-                    })
+                    });
             });
             const onError = ((err: Error) => {
                 console.error(err);
@@ -65,6 +65,6 @@ export class Express {
             );
             res.send("success");
         });
-        this.app.listen(process.env.PORT || 8080, () => { console.log('app listening on port 8080!') });
+        this.app.listen(process.env.PORT || 8080, () => { console.log('app listening on port 8080!'); });
     }
 }

@@ -1,11 +1,11 @@
 import React from 'react';
-import {createFFmpeg} from '@ffmpeg/ffmpeg';
+import { createFFmpeg } from '@ffmpeg/ffmpeg';
 import ProgressBar from '@ramonak/react-progress-bar';
-import {convertVideoToAudio} from './convertVideoToAudio'
-import {requestTranscription} from './requestTranscription'
-import {assertIsSingle} from './assertIsSingle'
-import './App.css'
-import {isRWAN} from './isRWAN'
+import { convertVideoToAudio } from './convertVideoToAudio';
+import { requestTranscription } from './requestTranscription';
+import { assertIsSingle } from './assertIsSingle';
+import './App.css';
+import { isRWAN } from './isRWAN';
 
 interface convertVideoToAudioStateInterface {
   progress: number;
@@ -30,7 +30,7 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
     this.requestUrl = process.env.REACT_APP_POST_URL;
   }
 
-  async componentDidMount():Promise<void> {
+  async componentDidMount(): Promise<void> {
     document.title = 'Teams会議の文字起こしツール';
 
     this.setState({
@@ -106,13 +106,13 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
       this.setState({
         isProcessing: false,
         message: "容量が大きすぎます。もっと短い動画ファイルを変換してください"
-      })
+      });
       return;
     }
     try {
       this.setState({
         message: "~送信中~"
-      })
+      });
       await requestTranscription(this.state.emailAddress, audioBlob, this.requestUrl);
       console.log("送信に成功しました");
       this.setState({
@@ -123,21 +123,21 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
       if (error instanceof Error) {
         if (process.env.NODE_ENV === "development") {
           this.setState({
-             message:`${error.message} 送信に失敗しました。
+            message: `${error.message} 送信に失敗しました。
              開発者に問い合わせてください。`
-           });
-       } 
-       if (process.env.NODE_ENV === "production") {
-         this.setState({
-           message:`${error.message} 送信に失敗しました。R-WANの接続を確認してください。
-           開発者に問い合わせてください。` 
-         });
-       }
+          });
+        }
+        if (process.env.NODE_ENV === "production") {
+          this.setState({
+            message: `${error.message} 送信に失敗しました。R-WANの接続を確認してください。
+           開発者に問い合わせてください。`
+          });
+        }
       } else {
         this.setState({
-          message:`送信に失敗しました。`
+          message: `送信に失敗しました。`
         });
-      }  
+      }
     } finally {
       this.setState({
         isProcessing: false,
@@ -145,7 +145,7 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
     }
   }
 
-  uploadForm():React.ReactElement {
+  uploadForm(): React.ReactElement {
     return (
       <form onSubmit={this.handleSubmit}>
         <p>
@@ -168,10 +168,10 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
           ))
         }</div>
       </form>
-    )
+    );
   }
 
-  render():React.ReactElement {
+  render(): React.ReactElement {
     if (this.state.drawForm == null) return <p>Loading page...</p>;
     return (
       <div>

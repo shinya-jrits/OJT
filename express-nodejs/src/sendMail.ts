@@ -1,4 +1,4 @@
-import sendgrid from '@sendgrid/mail'
+import sendgrid from '@sendgrid/mail';
 
 export class SendMail {
     /**
@@ -38,7 +38,7 @@ export class SendMail {
                             contentId: 'mytext',
                         }
                     ]
-        }
+        };
         try {
             await sendgrid.send(msg);
             console.log("send mail success");
