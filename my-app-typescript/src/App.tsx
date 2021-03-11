@@ -183,8 +183,10 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
     );
   }
 
-  isGoogleLoginResponse = (res: GoogleLoginResponse | GoogleLoginResponseOffline): res is GoogleLoginResponse => {
-    return true;
+  isGoogleLoginResponse = (val: unknown): val is GoogleLoginResponse => {
+    return val !== null &&
+      typeof val === 'object' &&
+      typeof (val as { profileObj?: unknown }) === 'object';
   }
 
   responseGoogle = (response: GoogleLoginResponse | GoogleLoginResponseOffline): void => {
