@@ -183,7 +183,7 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
     );
   }
 
-  isGoogleLoginResponse = (arg: GoogleLoginResponse | GoogleLoginResponseOffline): arg is GoogleLoginResponse => {
+  isGoogleLoginResponse = (res: GoogleLoginResponse | GoogleLoginResponseOffline): res is GoogleLoginResponse => {
     return true;
   }
 
