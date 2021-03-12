@@ -18,20 +18,29 @@ interface convertVideoToAudioStateInterface {
   emailAddress?: string;
 }
 
+interface googleLoginError {
+  error: string;
+}
+
 type EmptyProps = Record<string, never>;
 
 class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface> {
   requestUrl: string;
+  clientId: string;
   constructor() {
     super({});
     this.form = this.form.bind(this);
     this.uploadForm = this.uploadForm.bind(this);
-    this.loginButton = this.loginButton.bind(this);
+    this.googleButton = this.googleButton.bind(this);
     this.state = { progress: 0, isProcessing: false, isGoogleLogin: false };
     if (process.env.REACT_APP_POST_URL == null) {
       throw new Error('リクエスト先URLの取得に失敗しました');
     }
     this.requestUrl = process.env.REACT_APP_POST_URL;
+    if (process.env.REACT_APP_CLIENT_ID == null) {
+      throw new Error('Oauth認証のクライアントID取得に失敗しました');
+    }
+    this.clientId = process.env.REACT_APP_CLIENT_ID;
   }
 
   async componentDidMount(): Promise<void> {
@@ -173,7 +182,7 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
           ? <this.uploadForm />
           : ""
         }
-        <this.loginButton />
+        <this.googleButton />
         <div className="message">{
           this.state.message?.split('\n').map((str, index) => (
             <React.Fragment key={index}>{str}<br /></React.Fragment>
@@ -189,7 +198,7 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
       typeof (val as { profileObj?: unknown }) === 'object';
   }
 
-  responseGoogle = (response: GoogleLoginResponse | GoogleLoginResponseOffline): void => {
+  loginSuccess = (response: GoogleLoginResponse | GoogleLoginResponseOffline): void => {
     if (this.isGoogleLoginResponse(response)) {
       console.log(response.profileObj.email);
       this.setState({
@@ -199,9 +208,19 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
       });
     } else {
       this.setState({
-        message: response.code
+        message: `ログインできませんでした
+        ${response.code} `
       });
     }
+  }
+
+
+  loginFailure = (error: googleLoginError): void => {
+    this.setState({
+      isGoogleLogin: false,
+      message: `ログインできませんでした
+                ${error.error}`
+    });
   }
 
   logOutSuccess = (): void => {
@@ -211,14 +230,15 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
     });
   }
 
-  loginButton(): ReactElement {
+  googleButton(): ReactElement {
     if (!this.state.isGoogleLogin) {
       console.log("true");
       return (
         <GoogleLogin
-          clientId="483600820879-5pc4lb4p1ihhoj11otsn1g5rud7ra7gk.apps.googleusercontent.com"
+          clientId={this.clientId}
           buttonText="Login"
-          onSuccess={this.responseGoogle}
+          onSuccess={this.loginSuccess}
+          onFailure={this.loginFailure}
           isSignedIn={true}
           cookiePolicy={'single_host_origin'}
         />
@@ -226,7 +246,7 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
     } else {
       return (
         <GoogleLogout
-          clientId="483600820879-5pc4lb4p1ihhoj11otsn1g5rud7ra7gk.apps.googleusercontent.com"
+          clientId={this.clientId}
           buttonText="Logout"
           onLogoutSuccess={this.logOutSuccess}
         ></GoogleLogout>
