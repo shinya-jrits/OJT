@@ -175,12 +175,18 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
     );
   }
 
+  noUploadForm(): void {
+    this.setState({
+      message: "Google"
+    });
+  }
+
   form(): React.ReactElement {
     return (
       <div>
         {this.state.isGoogleLogin
           ? <this.uploadForm />
-          : ""
+          : <div>Googleアカウントでログインしてください</div>
         }
         <this.googleButton />
         <div className="message">{
