@@ -12,7 +12,7 @@ import { loginFailureMessage } from './loginFailureMessage';
 interface convertVideoToAudioStateInterface {
   progress: number;
   isProcessing: boolean;
-  isGoogleLogin: boolean;
+  isLoggedIn: boolean;
   drawForm?: boolean;
   message?: string
   videoFile?: File;
@@ -33,7 +33,7 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
     this.form = this.form.bind(this);
     this.uploadForm = this.uploadForm.bind(this);
     this.googleButton = this.googleButton.bind(this);
-    this.state = { progress: 0, isProcessing: false, isGoogleLogin: false };
+    this.state = { progress: 0, isProcessing: false, isLoggedIn: false };
     if (process.env.REACT_APP_POST_URL == null) {
       throw new Error('リクエスト先URLの取得に失敗しました');
     }
@@ -178,7 +178,7 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
   form(): React.ReactElement {
     return (
       <div>
-        {this.state.isGoogleLogin
+        {this.state.isLoggedIn
           ? <this.uploadForm />
           : <div>Googleアカウントでログインしてください</div>
         }
@@ -202,7 +202,7 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
     if (this.isGoogleLoginResponse(response)) {
       console.log(response.profileObj.email);
       this.setState({
-        isGoogleLogin: true,
+        isLoggedIn: true,
         emailAddress: response.profileObj.email,
         message: "ログインしました"
       });
@@ -217,7 +217,7 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
 
   loginFailure = (error: googleLoginError): void => {
     this.setState({
-      isGoogleLogin: false,
+      isLoggedIn: false,
       message: `ログインできませんでした
               ${loginFailureMessage(error.error)}`
     });
@@ -225,13 +225,13 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
 
   logOutSuccess = (): void => {
     this.setState({
-      isGoogleLogin: false,
+      isLoggedIn: false,
       message: "ログアウトしました"
     });
   }
 
   googleButton(): ReactElement {
-    if (!this.state.isGoogleLogin) {
+    if (!this.state.isLoggedIn) {
       console.log("true");
       return (
         <GoogleLogin
