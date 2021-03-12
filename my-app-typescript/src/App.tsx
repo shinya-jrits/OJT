@@ -7,6 +7,7 @@ import { assertIsSingle } from './assertIsSingle';
 import './App.css';
 import { isRWAN } from './isRWAN';
 import { GoogleLogin, GoogleLoginResponse, GoogleLoginResponseOffline, GoogleLogout } from 'react-google-login';
+import { loginFailureMessage } from './loginFailureMessage';
 
 interface convertVideoToAudioStateInterface {
   progress: number;
@@ -174,13 +175,6 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
       </form>
     );
   }
-
-  noUploadForm(): void {
-    this.setState({
-      message: "Google"
-    });
-  }
-
   form(): React.ReactElement {
     return (
       <div>
@@ -225,7 +219,7 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
     this.setState({
       isGoogleLogin: false,
       message: `ログインできませんでした
-                ${error.error}`
+              ${loginFailureMessage(error.error)}`
     });
   }
 
