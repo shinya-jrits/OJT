@@ -204,11 +204,6 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
         emailAddress: response.profileObj.email,
         message: "ログインしました"
       });
-    } else {
-      this.setState({
-        message: `ログインできませんでした
-        ${response.code} `
-      });
     }
   }
 
