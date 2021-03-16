@@ -33,7 +33,8 @@
     "start": "npm run lint & npm run ts-node",
     "ts-node": "ts-node --files -r tsconfig-paths/register src/index.ts",
     "dev": "ts-node-dev --files -r tsconfig-paths/register src/index.ts",
-    "lint": "eslint src"
+    "lint": "eslint src",
+    "lint:fix": "eslint --fix src"
   },
   "author": "",
   "license": "ISC",
