@@ -19,7 +19,7 @@ interface convertVideoToAudioStateInterface {
 type EmptyProps = Record<string, never>;
 
 class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface> {
-  requestUrl: string;
+  private readonly requestUrl: string;
   constructor() {
     super({});
     this.uploadForm = this.uploadForm.bind(this);
@@ -44,7 +44,7 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
    * 入力フォームの変更をstateに保存する
    * @param event 変更された部分
    */
-  handleChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
+  private readonly handleChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
     if (event.target.files != null) {
       assertIsSingle(event.target.files);
       this.setState({
@@ -64,7 +64,7 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
    * 動画ファイルを変換して、メールアドレスと一緒に文字起こしリクエストをバックエンドに送信する
    * @param event フォームインベント
    */
-  handleSubmit = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
+  private readonly handleSubmit = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();//ページ遷移を防ぐため
     if (this.state.emailAddress == null || this.state.emailAddress === "") {
       this.setState({
@@ -145,7 +145,7 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
     }
   }
 
-  uploadForm(): React.ReactElement {
+  private uploadForm(): React.ReactElement {
     return (
       <form onSubmit={this.handleSubmit}>
         <p>
