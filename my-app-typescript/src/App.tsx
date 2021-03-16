@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { createFFmpeg } from '@ffmpeg/ffmpeg';
 import ProgressBar from '@ramonak/react-progress-bar';
 import { convertVideoToAudio } from './convertVideoToAudio';
@@ -6,28 +6,42 @@ import { requestTranscription } from './requestTranscription';
 import { assertIsSingle } from './assertIsSingle';
 import './App.css';
 import { isRWAN } from './isRWAN';
+import { GoogleLogin, GoogleLoginResponse, GoogleLoginResponseOffline, GoogleLogout } from 'react-google-login';
+import { loginFailureMessage } from './loginFailureMessage';
 
 interface convertVideoToAudioStateInterface {
   progress: number;
   isProcessing: boolean;
+  isLoggedIn: boolean;
   drawForm?: boolean;
   message?: string
   videoFile?: File;
   emailAddress?: string;
 }
 
+interface googleLoginError {
+  error: string;
+}
+
 type EmptyProps = Record<string, never>;
 
 class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface> {
   private readonly requestUrl: string;
+  private readonly clientId: string;
   constructor() {
     super({});
+    this.form = this.form.bind(this);
     this.uploadForm = this.uploadForm.bind(this);
-    this.state = { progress: 0, isProcessing: false };
+    this.googleButton = this.googleButton.bind(this);
+    this.state = { progress: 0, isProcessing: false, isLoggedIn: false };
     if (process.env.REACT_APP_POST_URL == null) {
       throw new Error('リクエスト先URLの取得に失敗しました');
     }
     this.requestUrl = process.env.REACT_APP_POST_URL;
+    if (process.env.REACT_APP_CLIENT_ID == null) {
+      throw new Error('Oauth認証のクライアントID取得に失敗しました');
+    }
+    this.clientId = process.env.REACT_APP_CLIENT_ID;
   }
 
   async componentDidMount(): Promise<void> {
@@ -68,7 +82,7 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
     event.preventDefault();//ページ遷移を防ぐため
     if (this.state.emailAddress == null || this.state.emailAddress === "") {
       this.setState({
-        message: "メールアドレスを入力してください"
+        message: "Googleアカウントでログインしてください"
       });
       return;
     }
@@ -149,10 +163,6 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
     return (
       <form onSubmit={this.handleSubmit}>
         <p>
-          <label>結果を受け取るメールアドレス : <input type="email" minLength={1} name="mail"
-            placeholder="info@example.com" onChange={this.handleChange} /></label>
-        </p>
-        <p>
           <label>文字起こしを行う動画ファイル : <input type="file" accept="video/mp4"
             onChange={this.handleChange} /></label>
         </p>
@@ -162,13 +172,93 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
           ? <p><ProgressBar completed={this.state.progress} /></p>
           : ''
         }
+      </form>
+    );
+  }
+  form(): React.ReactElement {
+    return (
+      <div>
+        {this.state.isLoggedIn
+          ? <this.uploadForm />
+          : <div>Googleアカウントでログインしてください</div>
+        }
+        <this.googleButton />
         <div className="message">{
           this.state.message?.split('\n').map((str, index) => (
             <React.Fragment key={index}>{str}<br /></React.Fragment>
           ))
         }</div>
-      </form>
+      </div>
     );
+  }
+
+  /**
+   * GoolgeLogin成功時のコールバック関数
+   * @param response Login成功時に返されるパラメータ
+   */
+  private readonly onLoginSuccess = (response: GoogleLoginResponse | GoogleLoginResponseOffline): void => {
+    const isGoogleLoginResponse = (val: GoogleLoginResponse | GoogleLoginResponseOffline): val is GoogleLoginResponse => {
+      return 'profileObj' in val;
+    };
+    if (isGoogleLoginResponse(response)) {
+      console.log(response.profileObj.email);
+      this.setState({
+        isLoggedIn: true,
+        emailAddress: response.profileObj.email,
+        message: "ログインしました"
+      });
+    } else { //GoogleLoginResponseOfflineはOffline accessの方法でrefresh tokenを取る時のみ返す
+      //基本的にはoffline accessをしないのでこちらの条件にはならない
+      this.setState({
+        message: "ログインできませんでした"
+      });
+    }
+  }
+
+  /**
+   * GoogleLogin失敗時のコールバック関数
+   * @param error エラーメッセージ
+   */
+  private readonly onLoginFailure = (error: googleLoginError): void => {
+    this.setState({
+      isLoggedIn: false,
+      message: `ログインできませんでした
+              ${loginFailureMessage(error.error)}`
+    });
+  }
+
+  /**
+   * GoogleLoout成功時のコールバック関数
+   */
+  private readonly onLogoutSuccess = (): void => {
+    this.setState({
+      isLoggedIn: false,
+      message: "ログアウトしました"
+    });
+  }
+
+  googleButton(): ReactElement {
+    if (!this.state.isLoggedIn) {
+      console.log("true");
+      return (
+        <GoogleLogin
+          clientId={this.clientId}
+          buttonText="Login"
+          onSuccess={this.onLoginSuccess}
+          onFailure={this.onLoginFailure}
+          isSignedIn={true}
+          cookiePolicy={'single_host_origin'}
+        />
+      );
+    } else {
+      return (
+        <GoogleLogout
+          clientId={this.clientId}
+          buttonText="Logout"
+          onLogoutSuccess={this.onLogoutSuccess}
+        ></GoogleLogout>
+      );
+    }
   }
 
   render(): React.ReactElement {
@@ -177,7 +267,7 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
       <div>
         <h1>OJTテーマ：Teams会議の文字起こしツール</h1>
         {this.state.drawForm
-          ? <this.uploadForm />
+          ? <this.form />
           : <h3 className="R-WAN">※R-WANで接続してください</h3>
         }
       </div>
