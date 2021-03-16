@@ -192,23 +192,34 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
     );
   }
 
-  isGoogleLoginResponse = (val: GoogleLoginResponse | GoogleLoginResponseOffline): val is GoogleLoginResponse => {
-    return 'profileObj' in val;
-  }
-
-  loginSuccess = (response: GoogleLoginResponse | GoogleLoginResponseOffline): void => {
-    if (this.isGoogleLoginResponse(response)) {
+  /**
+   * GoolgeLogin成功時のコールバック関数
+   * @param response Login成功時に返されるパラメータ
+   */
+  private readonly onLoginSuccess = (response: GoogleLoginResponse | GoogleLoginResponseOffline): void => {
+    const isGoogleLoginResponse = (val: GoogleLoginResponse | GoogleLoginResponseOffline): val is GoogleLoginResponse => {
+      return 'profileObj' in val;
+    };
+    if (isGoogleLoginResponse(response)) {
       console.log(response.profileObj.email);
       this.setState({
         isLoggedIn: true,
         emailAddress: response.profileObj.email,
         message: "ログインしました"
       });
+    } else { //GoogleLoginResponseOfflineはOffline accessの方法でrefresh tokenを取る時のみ返す
+      //基本的にはoffline accessをしないのでこちらの条件にはならない
+      this.setState({
+        message: "ログインできませんでした"
+      });
     }
   }
 
-
-  loginFailure = (error: googleLoginError): void => {
+  /**
+   * GoogleLogin失敗時のコールバック関数
+   * @param error エラーメッセージ
+   */
+  private readonly onLoginFailure = (error: googleLoginError): void => {
     this.setState({
       isLoggedIn: false,
       message: `ログインできませんでした
@@ -216,7 +227,10 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
     });
   }
 
-  logOutSuccess = (): void => {
+  /**
+   * GoogleLoout成功時のコールバック関数
+   */
+  private readonly onLogoutSuccess = (): void => {
     this.setState({
       isLoggedIn: false,
       message: "ログアウトしました"
@@ -230,8 +244,8 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
         <GoogleLogin
           clientId={this.clientId}
           buttonText="Login"
-          onSuccess={this.loginSuccess}
-          onFailure={this.loginFailure}
+          onSuccess={this.onLoginSuccess}
+          onFailure={this.onLoginFailure}
           isSignedIn={true}
           cookiePolicy={'single_host_origin'}
         />
@@ -241,7 +255,7 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
         <GoogleLogout
           clientId={this.clientId}
           buttonText="Logout"
-          onLogoutSuccess={this.logOutSuccess}
+          onLogoutSuccess={this.onLogoutSuccess}
         ></GoogleLogout>
       );
     }
