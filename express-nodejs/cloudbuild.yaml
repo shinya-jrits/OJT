@@ -1,5 +1,4 @@
 steps:
 - name: "gcr.io/cloud-builders/gcloud"
   args: ["app", "deploy","express-nodejs/"]
-  dir : 'express-nodejs'
 timeout: "1600s"
