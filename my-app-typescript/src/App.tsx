@@ -8,7 +8,6 @@ import './App.css';
 import { isRWAN } from './isRWAN';
 import { GoogleLogin, GoogleLoginResponse, GoogleLoginResponseOffline, GoogleLogout } from 'react-google-login';
 import { loginFailureMessage } from './loginFailureMessage';
-import { confirmFormEntry } from './confirmFormEntry';
 
 interface convertVideoToAudioStateInterface {
   progress: number;
@@ -81,13 +80,18 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
    */
   private readonly handleSubmit = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();//ページ遷移を防ぐため
-    const errorMess = confirmFormEntry(this.state.emailAddress, this.state.videoFile);
-    if (errorMess != null) {
+    if (this.state.emailAddress == null || this.state.emailAddress === "") {
       this.setState({
-        message: errorMess
+        message: "Googleアカウントでログインしてください"
       });
+      return;
     }
-
+    if (this.state.videoFile == null) {
+      this.setState({
+        message: "ファイルを選択してください"
+      });
+      return;
+    }
     const ffmpeg = createFFmpeg({
       log: true
     });
