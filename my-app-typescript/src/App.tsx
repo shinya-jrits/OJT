@@ -111,21 +111,7 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
     }
   }
 
-
-  /**
-   * 動画ファイルを変換して、メールアドレスと一緒に文字起こしリクエストをバックエンドに送信する
-   * @param event フォームインベント
-   */
-  private readonly handleSubmit = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
-    event.preventDefault();//ページ遷移を防ぐため
-    try {
-      this.emailAddressIsDefine(this.state.emailAddress);
-      this.videoFileIsDefine(this.state.videoFile);
-    } catch {
-      return;
-    }
-    this.initializeProcessing();
-
+  private readonly convertVideoToAudio = async (videoFile: File): Promise<Blob | null> => {
     const ffmpeg = new FFmpegWrapper(createFFmpeg({ log: true }));
     const setStateProgress = (ratio: number) => {
       this.setState({
@@ -136,30 +122,34 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
 
     let audioBlob: Blob;
     try {
-      audioBlob = await ffmpeg.convertVideoToAudio(this.state.videoFile);
+      audioBlob = await ffmpeg.convertVideoToAudio(videoFile);
     } catch (error) {
       this.setState({
         isProcessing: false,
         message: "ファイルの変換に失敗しました"
       });
       console.error(error);
-      return;
+      return null;
     }
     if (audioBlob.size > 30 * 1024 * 1024) {
       this.setState({
         isProcessing: false,
         message: "容量が大きすぎます。もっと短い動画ファイルを変換してください"
       });
-      return;
+      return null;
     }
+    return audioBlob;
+  }
+
+  private readonly requestTranscription = async (audioBlob: Blob, emailAddress: string): Promise<void> => {
     try {
       this.setState({
         message: "~送信中~"
       });
-      await requestTranscription(this.state.emailAddress, audioBlob, this.requestUrl);
+      await requestTranscription(emailAddress, audioBlob, this.requestUrl);
       console.log("送信に成功しました");
       this.setState({
-        message: `送信に成功しました。文字起こし結果は ${this.state.emailAddress} に送られます。
+        message: `送信に成功しました。文字起こし結果は ${emailAddress} に送られます。
               結果の返信には動画時間の半分程度かかりますが、ブラウザは閉じて構いません。`
       });
     } catch (error) {
@@ -181,9 +171,32 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
           message: `送信に失敗しました。`
         });
       }
-    } finally {
-      this.finalizeProcessing();
     }
+  }
+
+
+  /**
+   * 動画ファイルを変換して、メールアドレスと一緒に文字起こしリクエストをバックエンドに送信する
+   * @param event フォームインベント
+   */
+  private readonly handleSubmit = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
+    event.preventDefault();//ページ遷移を防ぐため
+    try {
+      this.emailAddressIsDefine(this.state.emailAddress);
+      this.videoFileIsDefine(this.state.videoFile);
+    } catch {
+      return;
+    }
+    this.initializeProcessing();
+
+    const audioBlob = await this.convertVideoToAudio(this.state.videoFile);
+    if (audioBlob == null) {
+      return;
+    }
+
+    await this.requestTranscription(audioBlob, this.state.emailAddress);
+
+    this.finalizeProcessing();
   }
 
   private uploadForm(): React.ReactElement {
