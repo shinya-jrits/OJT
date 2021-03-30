@@ -33,6 +33,7 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
     this.form = this.form.bind(this);
     this.uploadForm = this.uploadForm.bind(this);
     this.googleButton = this.googleButton.bind(this);
+    this.initializeProcessing = this.initializeProcessing.bind(this);
     this.state = { progress: 0, isProcessing: false, isLoggedIn: false };
     if (process.env.REACT_APP_POST_URL == null) {
       throw new Error('リクエスト先URLの取得に失敗しました');
@@ -74,33 +75,55 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
     }
   }
 
+  private readonly initializeProcessing = (): void => {
+    this.setState({
+      progress: 0,
+      isProcessing: true,
+      message: ""
+    });
+  }
+
+  //Assertion Functionsは通常のアロー関数では動かない為
+  private emailAddressIsDefine(address?: string): asserts address is string {
+    if (address == null || address === "") {
+      this.setState({
+        message: "Googleアカウントでログインしてください"
+      });
+      throw new Error('emailAddressが不正な値です');
+    }
+  }
+
+  //Assertion Functionsは通常のアロー関数では動かない為
+  private videoFileIsDefine(videoFile?: File): asserts videoFile is File {
+    if (videoFile == null) {
+      if (this.state.videoFile == null) {
+        this.setState({
+          message: "ファイルを選択してください"
+        });
+      }
+      throw new Error("videoFileが不正な値です");
+    }
+  }
+
+
   /**
    * 動画ファイルを変換して、メールアドレスと一緒に文字起こしリクエストをバックエンドに送信する
    * @param event フォームインベント
    */
   private readonly handleSubmit = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();//ページ遷移を防ぐため
-    if (this.state.emailAddress == null || this.state.emailAddress === "") {
-      this.setState({
-        message: "Googleアカウントでログインしてください"
-      });
+    try {
+      this.emailAddressIsDefine(this.state.emailAddress);
+      this.videoFileIsDefine(this.state.videoFile);
+    } catch {
       return;
     }
-    if (this.state.videoFile == null) {
-      this.setState({
-        message: "ファイルを選択してください"
-      });
-      return;
-    }
+    this.initializeProcessing();
+
     const ffmpeg = createFFmpeg({
       log: true
     });
-    this.setState({
-      progress: 0,
-      isProcessing: true,
-      message: ""
-    });
-    ffmpeg.setProgress(({ ratio }) => {
+    ffmpeg.setProgress(({ ratio }) => {//ffmpegの周辺
       this.setState({
         progress: Math.round(100 * ratio)
       });
