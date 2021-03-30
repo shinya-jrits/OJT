@@ -75,6 +75,9 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
     }
   }
 
+  /**
+   * progressbarやメッセージ領域を初期化する、プロセッシングを開始する
+   */
   private readonly initializeProcessing = (): void => {
     this.setState({
       progress: 0,
@@ -83,6 +86,9 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
     });
   }
 
+  /**
+   * isProcessingを終了する
+   */
   private readonly finalizeProcessing = (): void => {
     this.setState({
       isProcessing: false,
@@ -111,6 +117,11 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
     }
   }
 
+  /**
+   * 動画を音声に変換する
+   * @param videoFile 変換する動画ファイル
+   * @returns 変換した音声ファイルを返す、変換に失敗したらnullを返す
+   */
   private readonly convertVideoToAudio = async (videoFile: File): Promise<Blob | null> => {
     const ffmpeg = new FFmpegWrapper(createFFmpeg({ log: true }));
     const setStateProgress = (ratio: number) => {
@@ -141,6 +152,11 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
     return audioBlob;
   }
 
+  /**
+   * バックエンドに文字起こしをリクエストする
+   * @param audioBlob 文字起こしする音声ファイル
+   * @param emailAddress 結果を返すメールアドレス
+   */
   private readonly requestTranscription = async (audioBlob: Blob, emailAddress: string): Promise<void> => {
     try {
       this.setState({
@@ -176,7 +192,7 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
 
 
   /**
-   * 動画ファイルを変換して、メールアドレスと一緒に文字起こしリクエストをバックエンドに送信する
+   * フォームの送信ボタンを押されたら呼ばれるメソッド
    * @param event フォームインベント
    */
   private readonly handleSubmit = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
@@ -215,6 +231,7 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
       </form>
     );
   }
+
   form(): React.ReactElement {
     return (
       <div>
