@@ -83,6 +83,12 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
     });
   }
 
+  private readonly finalizeProcessing = (): void => {
+    this.setState({
+      isProcessing: false,
+    });
+  }
+
   //Assertion Functionsは通常のアロー関数では動かない為
   private emailAddressIsDefine(address?: string): asserts address is string {
     if (address == null || address === "") {
@@ -126,7 +132,6 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
         progress: Math.round(ratio * 100)
       });
     };
-
     ffmpeg.setProgress(setStateProgress);
 
     let audioBlob: Blob;
@@ -177,9 +182,7 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
         });
       }
     } finally {
-      this.setState({
-        isProcessing: false,
-      });
+      this.finalizeProcessing();
     }
   }
 
