@@ -1,7 +1,7 @@
 import React, { ReactElement } from 'react';
 import { createFFmpeg } from '@ffmpeg/ffmpeg';
 import ProgressBar from '@ramonak/react-progress-bar';
-import { convertVideoToAudio } from './convertVideoToAudio';
+import { FFmpegWrapper } from './FFmpegWrapper';
 import { requestTranscription } from './requestTranscription';
 import { assertIsSingle } from './assertIsSingle';
 import './App.css';
@@ -120,17 +120,18 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
     }
     this.initializeProcessing();
 
-    const ffmpeg = createFFmpeg({
-      log: true
-    });
-    ffmpeg.setProgress(({ ratio }) => {//ffmpegの周辺
+    const ffmpeg = new FFmpegWrapper(createFFmpeg({ log: true }));
+    const setStateProgress = (ratio: number) => {
       this.setState({
-        progress: Math.round(100 * ratio)
+        progress: Math.round(ratio * 100)
       });
-    });
+    };
+
+    ffmpeg.setProgress(setStateProgress);
+
     let audioBlob: Blob;
     try {
-      audioBlob = await convertVideoToAudio(this.state.videoFile, ffmpeg);
+      audioBlob = await ffmpeg.convertVideoToAudio(this.state.videoFile);
     } catch (error) {
       this.setState({
         isProcessing: false,
