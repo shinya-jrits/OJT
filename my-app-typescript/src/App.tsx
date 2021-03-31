@@ -95,6 +95,12 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
     });
   }
 
+  private readonly isLoggedIn = (val: boolean): void => {
+    this.setState({
+      isLoggedIn: val
+    });
+  }
+
   /**
    * progressbarを表示しなくする
    */
@@ -259,8 +265,8 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
     };
     if (isGoogleLoginResponse(response)) {
       console.log(response.profileObj.email);
+      this.isLoggedIn(true);
       this.setState({
-        isLoggedIn: true,
         emailAddress: response.profileObj.email
       });
       this.setMessage("ログインしました");
@@ -275,9 +281,7 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
    * @param error エラーメッセージ
    */
   private readonly onLoginFailure = (error: googleLoginError): void => {
-    this.setState({
-      isLoggedIn: false,
-    });
+    this.isLoggedIn(false);
     this.setMessage(`ログインできませんでした
     ${loginFailureMessage(error.error)}`);
   }
@@ -286,9 +290,7 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
    * GoogleLoout成功時のコールバック関数
    */
   private readonly onLogoutSuccess = (): void => {
-    this.setState({
-      isLoggedIn: false,
-    });
+    this.isLoggedIn(false);
     this.setMessage("ログアウトしました");
   }
 
