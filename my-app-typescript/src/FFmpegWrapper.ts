@@ -2,11 +2,10 @@ import { FFmpeg, fetchFile } from "@ffmpeg/ffmpeg";
 
 export class FFmpegWrapper {
     constructor(
-        private readonly ffmpeg: FFmpeg
-    ) { }
-    setProgress(setProgress: (setRatio: number) => void): void {
-
-        this.ffmpeg.setProgress(({ ratio }) => {//ffmpegの周辺
+        private readonly ffmpeg: FFmpeg,
+        private readonly setProgress: (setRatio: number) => void
+    ) {
+        this.ffmpeg.setProgress(({ ratio }) => {
             setProgress(ratio);
         });
     }

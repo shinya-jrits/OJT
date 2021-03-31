@@ -123,13 +123,12 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
    * @returns 変換した音声ファイルを返す、変換に失敗したらnullを返す
    */
   private readonly convertVideoToAudio = async (videoFile: File): Promise<Blob | null> => {
-    const ffmpeg = new FFmpegWrapper(createFFmpeg({ log: true }));
     const setStateProgress = (ratio: number) => {
       this.setState({
         progress: Math.round(ratio * 100)
       });
     };
-    ffmpeg.setProgress(setStateProgress);
+    const ffmpeg = new FFmpegWrapper(createFFmpeg({ log: true }), setStateProgress);
 
     let audioBlob: Blob;
     try {
