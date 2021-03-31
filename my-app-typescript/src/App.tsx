@@ -33,7 +33,7 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
     this.form = this.form.bind(this);
     this.uploadForm = this.uploadForm.bind(this);
     this.googleButton = this.googleButton.bind(this);
-    this.initializeState = this.initializeState.bind(this);
+    this.showProgressBar = this.showProgressBar.bind(this);
     this.state = { progress: 0, isProcessing: false, isLoggedIn: false };
     if (process.env.REACT_APP_POST_URL == null) {
       throw new Error('リクエスト先URLの取得に失敗しました');
@@ -78,18 +78,27 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
   /**
    * progressbarやメッセージ領域を初期化する、プロセッシングを開始する
    */
-  private readonly initializeState = (): void => {
+  private readonly showProgressBar = (): void => {
     this.setState({
       progress: 0,
       isProcessing: true,
-      message: ""
+    });
+  }
+
+  /**
+   * メッセージエリアにメッセージを入力する
+   * @param message 表示するメッセージ
+   */
+  private readonly setMessage = (message: string): void => {
+    this.setState({
+      message: message
     });
   }
 
   /**
    * progressbarを表示しなくする
    */
-  private readonly finalizeState = (): void => {
+  private readonly hideProgressBar = (): void => {
     this.setState({
       isProcessing: false,
     });
@@ -103,9 +112,7 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
    */
   private emailAddressIsDefine(address?: string): asserts address is string {
     if (!address) {
-      this.setState({
-        message: "Googleアカウントでログインしてください"
-      });
+      this.setMessage("Googleアカウントでログインしてください");
       throw new Error('emailAddressが不正な値です');
     }
   }
@@ -118,9 +125,7 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
   private videoFileIsDefine(videoFile?: File): asserts videoFile is File {
     if (!videoFile) {
       if (this.state.videoFile == null) {
-        this.setState({
-          message: "ファイルを選択してください"
-        });
+        this.setMessage("ファイルを選択してください");
       }
       throw new Error("videoFileが不正な値です");
     }
@@ -145,16 +150,16 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
     } catch (error) {
       this.setState({
         isProcessing: false,
-        message: "ファイルの変換に失敗しました"
       });
+      this.setMessage("ファイルの変換に失敗しました");
       console.error(error);
       return null;
     }
     if (audioBlob.size > 30 * 1024 * 1024) {
       this.setState({
         isProcessing: false,
-        message: "容量が大きすぎます。もっと短い動画ファイルを変換してください"
       });
+      this.setMessage("容量が大きすぎます。もっと短い動画ファイルを変換してください");
       return null;
     }
     return audioBlob;
@@ -211,7 +216,8 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
     } catch {
       return;
     }
-    this.initializeState();
+    this.showProgressBar();
+    this.setMessage("");
 
     const audioBlob = await this.convertVideoToAudio(this.state.videoFile);
     if (audioBlob == null) {
@@ -220,7 +226,7 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
 
     await this.requestTranscription(audioBlob, this.state.emailAddress);
 
-    this.finalizeState();
+    this.hideProgressBar();
   }
 
   private uploadForm(): React.ReactElement {
@@ -269,14 +275,12 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
       console.log(response.profileObj.email);
       this.setState({
         isLoggedIn: true,
-        emailAddress: response.profileObj.email,
-        message: "ログインしました"
+        emailAddress: response.profileObj.email
       });
+      this.setMessage("ログインしました");
     } else { //GoogleLoginResponseOfflineはOffline accessの方法でrefresh tokenを取る時のみ返す
       //基本的にはoffline accessをしないのでこちらの条件にはならない
-      this.setState({
-        message: "ログインできませんでした"
-      });
+      this.setMessage("ログインできませんでした");
     }
   }
 
@@ -287,9 +291,9 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
   private readonly onLoginFailure = (error: googleLoginError): void => {
     this.setState({
       isLoggedIn: false,
-      message: `ログインできませんでした
-              ${loginFailureMessage(error.error)}`
     });
+    this.setMessage(`ログインできませんでした
+    ${loginFailureMessage(error.error)}`);
   }
 
   /**
@@ -298,8 +302,8 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
   private readonly onLogoutSuccess = (): void => {
     this.setState({
       isLoggedIn: false,
-      message: "ログアウトしました"
     });
+    this.setMessage("ログアウトしました");
   }
 
   googleButton(): ReactElement {
