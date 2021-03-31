@@ -12,7 +12,6 @@ export class FFmpegWrapper {
     /**
      * 動画ファイルを音声ファイルに変換する
      * @param videoFile 変換元ファイル 
-     * @param ffmpeg 変換を実行するメソッド
      */
     async convertVideoToAudio(videoFile: File): Promise<Blob> {
         await this.ffmpeg.load();
