@@ -148,17 +148,13 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
     try {
       audioBlob = await ffmpeg.convertVideoToAudio(videoFile);
     } catch (error) {
-      this.setState({
-        isProcessing: false,
-      });
+      this.hideProgressBar();
       this.setMessage("ファイルの変換に失敗しました");
       console.error(error);
       return null;
     }
     if (audioBlob.size > 30 * 1024 * 1024) {
-      this.setState({
-        isProcessing: false,
-      });
+      this.hideProgressBar();
       this.setMessage("容量が大きすぎます。もっと短い動画ファイルを変換してください");
       return null;
     }
@@ -172,33 +168,23 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
    */
   private readonly requestTranscription = async (audioBlob: Blob, emailAddress: string): Promise<void> => {
     try {
-      this.setState({
-        message: "~送信中~"
-      });
+      this.setMessage("~送信中~");
       await requestTranscription(emailAddress, audioBlob, this.requestUrl);
       console.log("送信に成功しました");
-      this.setState({
-        message: `送信に成功しました。文字起こし結果は ${emailAddress} に送られます。
-              結果の返信には動画時間の半分程度かかりますが、ブラウザは閉じて構いません。`
-      });
+      this.setMessage(`送信に成功しました。文字起こし結果は ${emailAddress} に送られます。
+      結果の返信には動画時間の半分程度かかりますが、ブラウザは閉じて構いません。`);
     } catch (error) {
       if (error instanceof Error) {
         if (process.env.NODE_ENV === "development") {
-          this.setState({
-            message: `${error.message} 送信に失敗しました。
-             開発者に問い合わせてください。`
-          });
+          this.setMessage(`${error.message} 送信に失敗しました。
+          開発者に問い合わせてください。`);
         }
         if (process.env.NODE_ENV === "production") {
-          this.setState({
-            message: `${error.message} 送信に失敗しました。R-WANの接続を確認してください。
-           開発者に問い合わせてください。`
-          });
+          this.setMessage(`${error.message} 送信に失敗しました。R-WANの接続を確認してください。
+          開発者に問い合わせてください。`);
         }
       } else {
-        this.setState({
-          message: `送信に失敗しました。`
-        });
+        this.setMessage(`送信に失敗しました。`);
       }
     }
   }
