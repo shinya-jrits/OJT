@@ -201,7 +201,7 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
 
   /**
    * フォームの送信ボタンを押されたら呼ばれるメソッド
-   * @param event フォームインベント
+   * @param event フォームイベント
    */
   private readonly handleSubmit = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();//ページ遷移を防ぐため
