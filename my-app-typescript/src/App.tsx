@@ -96,8 +96,13 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
   }
 
   //Assertion Functionsは通常のアロー関数では動かない為
+  /**
+   * メールアドレスのnullチェック、文字列があるかを確認する
+   * Googleアカウントでログインしないとフォームが出ないので本来ならばnullにはならないはずである
+   * @param address 送信先のメールアドレス
+   */
   private emailAddressIsDefine(address?: string): asserts address is string {
-    if (address == null || address === "") {
+    if (!address) {
       this.setState({
         message: "Googleアカウントでログインしてください"
       });
@@ -106,8 +111,12 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
   }
 
   //Assertion Functionsは通常のアロー関数では動かない為
+  /**
+   * 入力された動画ファイルのnullチェック
+   * @param videoFile 変換対象の動画ファイル
+   */
   private videoFileIsDefine(videoFile?: File): asserts videoFile is File {
-    if (videoFile == null) {
+    if (!videoFile) {
       if (this.state.videoFile == null) {
         this.setState({
           message: "ファイルを選択してください"
