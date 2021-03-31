@@ -33,7 +33,7 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
     this.form = this.form.bind(this);
     this.uploadForm = this.uploadForm.bind(this);
     this.googleButton = this.googleButton.bind(this);
-    this.initializeProcessing = this.initializeProcessing.bind(this);
+    this.initializeState = this.initializeState.bind(this);
     this.state = { progress: 0, isProcessing: false, isLoggedIn: false };
     if (process.env.REACT_APP_POST_URL == null) {
       throw new Error('リクエスト先URLの取得に失敗しました');
@@ -78,7 +78,7 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
   /**
    * progressbarやメッセージ領域を初期化する、プロセッシングを開始する
    */
-  private readonly initializeProcessing = (): void => {
+  private readonly initializeState = (): void => {
     this.setState({
       progress: 0,
       isProcessing: true,
@@ -87,9 +87,9 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
   }
 
   /**
-   * isProcessingを終了する
+   * progressbarを表示しなくする
    */
-  private readonly finalizeProcessing = (): void => {
+  private readonly finalizeState = (): void => {
     this.setState({
       isProcessing: false,
     });
@@ -202,7 +202,7 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
     } catch {
       return;
     }
-    this.initializeProcessing();
+    this.initializeState();
 
     const audioBlob = await this.convertVideoToAudio(this.state.videoFile);
     if (audioBlob == null) {
@@ -211,7 +211,7 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
 
     await this.requestTranscription(audioBlob, this.state.emailAddress);
 
-    this.finalizeProcessing();
+    this.finalizeState();
   }
 
   private uploadForm(): React.ReactElement {
