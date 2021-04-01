@@ -293,7 +293,7 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
     this.setMessage("ログアウトしました");
   }
 
-  googleButton(): ReactElement {
+  private googleButton(): ReactElement {
     if (!this.state.isLoggedIn) {
       console.log("true");
       return (
