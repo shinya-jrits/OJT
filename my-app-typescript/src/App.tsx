@@ -33,7 +33,6 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
     this.form = this.form.bind(this);
     this.uploadForm = this.uploadForm.bind(this);
     this.googleButton = this.googleButton.bind(this);
-    this.showProgressBar = this.showProgressBar.bind(this);
     this.state = { progress: 0, isProcessing: false, isLoggedIn: false };
     if (process.env.REACT_APP_POST_URL == null) {
       throw new Error('リクエスト先URLの取得に失敗しました');
