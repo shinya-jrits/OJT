@@ -30,9 +30,6 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
   private readonly clientId: string;
   constructor() {
     super({});
-    this.form = this.form.bind(this);
-    this.uploadForm = this.uploadForm.bind(this);
-    this.googleButton = this.googleButton.bind(this);
     this.state = { progress: 0, isProcessing: false, isLoggedIn: false };
     if (process.env.REACT_APP_POST_URL == null) {
       throw new Error('リクエスト先URLの取得に失敗しました');
@@ -220,7 +217,7 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
     this.hideProgressBar();
   }
 
-  private uploadForm(): React.ReactElement {
+  private readonly uploadForm = (): React.ReactElement => {
     return (
       <form onSubmit={this.handleSubmit}>
         <p>
@@ -237,7 +234,7 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
     );
   }
 
-  form(): React.ReactElement {
+  private readonly form = (): React.ReactElement => {
     return (
       <div>
         {this.state.isLoggedIn
@@ -293,7 +290,7 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
     this.setMessage("ログアウトしました");
   }
 
-  private googleButton(): ReactElement {
+  private readonly googleButton = (): ReactElement => {
     if (!this.state.isLoggedIn) {
       console.log("true");
       return (
