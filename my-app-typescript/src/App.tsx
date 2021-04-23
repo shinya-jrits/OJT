@@ -1,7 +1,7 @@
 import React, { ReactElement } from 'react';
 import { createFFmpeg } from '@ffmpeg/ffmpeg';
 import ProgressBar from '@ramonak/react-progress-bar';
-import { convertVideoToAudio } from './convertVideoToAudio';
+import { FFmpegWrapper } from './FFmpegWrapper';
 import { requestTranscription } from './requestTranscription';
 import { assertIsSingle } from './assertIsSingle';
 import './App.css';
@@ -30,9 +30,6 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
   private readonly clientId: string;
   constructor() {
     super({});
-    this.form = this.form.bind(this);
-    this.uploadForm = this.uploadForm.bind(this);
-    this.googleButton = this.googleButton.bind(this);
     this.state = { progress: 0, isProcessing: false, isLoggedIn: false };
     if (process.env.REACT_APP_POST_URL == null) {
       throw new Error('リクエスト先URLの取得に失敗しました');
@@ -75,91 +72,152 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
   }
 
   /**
-   * 動画ファイルを変換して、メールアドレスと一緒に文字起こしリクエストをバックエンドに送信する
-   * @param event フォームインベント
+   * progressbarやメッセージ領域を初期化する、プロセッシングを開始する
    */
-  private readonly handleSubmit = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
-    event.preventDefault();//ページ遷移を防ぐため
-    if (this.state.emailAddress == null || this.state.emailAddress === "") {
-      this.setState({
-        message: "Googleアカウントでログインしてください"
-      });
-      return;
-    }
-    if (this.state.videoFile == null) {
-      this.setState({
-        message: "ファイルを選択してください"
-      });
-      return;
-    }
-    const ffmpeg = createFFmpeg({
-      log: true
-    });
+  private readonly showProgressBar = (): void => {
     this.setState({
       progress: 0,
       isProcessing: true,
-      message: ""
     });
-    ffmpeg.setProgress(({ ratio }) => {
-      this.setState({
-        progress: Math.round(100 * ratio)
-      });
+  }
+
+  /**
+   * メッセージエリアにメッセージを入力する
+   * @param message 表示するメッセージ
+   */
+  private readonly setMessage = (message: string): void => {
+    this.setState({
+      message: message
     });
-    let audioBlob: Blob;
-    try {
-      audioBlob = await convertVideoToAudio(this.state.videoFile, ffmpeg);
-    } catch (error) {
-      this.setState({
-        isProcessing: false,
-        message: "ファイルの変換に失敗しました"
-      });
-      console.error(error);
-      return;
-    }
-    if (audioBlob.size > 30 * 1024 * 1024) {
-      this.setState({
-        isProcessing: false,
-        message: "容量が大きすぎます。もっと短い動画ファイルを変換してください"
-      });
-      return;
-    }
-    try {
-      this.setState({
-        message: "~送信中~"
-      });
-      await requestTranscription(this.state.emailAddress, audioBlob, this.requestUrl);
-      console.log("送信に成功しました");
-      this.setState({
-        message: `送信に成功しました。文字起こし結果は ${this.state.emailAddress} に送られます。
-              結果の返信には動画時間の半分程度かかりますが、ブラウザは閉じて構いません。`
-      });
-    } catch (error) {
-      if (error instanceof Error) {
-        if (process.env.NODE_ENV === "development") {
-          this.setState({
-            message: `${error.message} 送信に失敗しました。
-             開発者に問い合わせてください。`
-          });
-        }
-        if (process.env.NODE_ENV === "production") {
-          this.setState({
-            message: `${error.message} 送信に失敗しました。R-WANの接続を確認してください。
-           開発者に問い合わせてください。`
-          });
-        }
-      } else {
-        this.setState({
-          message: `送信に失敗しました。`
-        });
-      }
-    } finally {
-      this.setState({
-        isProcessing: false,
-      });
+  }
+
+  private readonly isLoggedIn = (val: boolean): void => {
+    this.setState({
+      isLoggedIn: val
+    });
+  }
+
+  /**
+   * progressbarを表示しなくする
+   */
+  private readonly hideProgressBar = (): void => {
+    this.setState({
+      isProcessing: false,
+    });
+  }
+
+  //Assertion Functionsは通常のアロー関数では動かない為
+  /**
+   * メールアドレスのnullチェック、文字列があるかを確認する
+   * Googleアカウントでログインしないとフォームが出ないので本来ならばnullにはならないはずである
+   * @param address 送信先のメールアドレス
+   */
+  private emailAddressIsDefine(address?: string): asserts address is string {
+    if (!address) {
+      this.setMessage("Googleアカウントでログインしてください");
+      throw new Error('emailAddressが不正な値です');
     }
   }
 
-  private uploadForm(): React.ReactElement {
+  //Assertion Functionsは通常のアロー関数では動かない為
+  /**
+   * 入力された動画ファイルのnullチェック
+   * @param videoFile 変換対象の動画ファイル
+   */
+  private videoFileIsDefine(videoFile?: File): asserts videoFile is File {
+    if (!videoFile) {
+      if (this.state.videoFile == null) {
+        this.setMessage("ファイルを選択してください");
+      }
+      throw new Error("videoFileが不正な値です");
+    }
+  }
+
+  /**
+   * 動画を音声に変換する
+   * @param videoFile 変換する動画ファイル
+   * @returns 変換した音声ファイルを返す、変換に失敗したらnullを返す
+   */
+  private readonly convertVideoToAudio = async (videoFile: File): Promise<Blob | null> => {
+    const setStateProgress = (ratio: number) => {
+      this.setState({
+        progress: Math.round(ratio * 100)
+      });
+    };
+    const ffmpeg = new FFmpegWrapper(createFFmpeg({ log: true }), setStateProgress);
+
+    let audioBlob: Blob;
+    try {
+      audioBlob = await ffmpeg.convertVideoToAudio(videoFile);
+    } catch (error) {
+      this.hideProgressBar();
+      this.setMessage("ファイルの変換に失敗しました");
+      console.error(error);
+      return null;
+    }
+    if (audioBlob.size > 30 * 1024 * 1024) {
+      this.hideProgressBar();
+      this.setMessage("容量が大きすぎます。もっと短い動画ファイルを変換してください");
+      return null;
+    }
+    return audioBlob;
+  }
+
+  /**
+   * バックエンドに文字起こしをリクエストする
+   * @param audioBlob 文字起こしする音声ファイル
+   * @param emailAddress 結果を返すメールアドレス
+   */
+  private readonly requestTranscription = async (audioBlob: Blob, emailAddress: string): Promise<void> => {
+    try {
+      this.setMessage("~送信中~");
+      await requestTranscription(emailAddress, audioBlob, this.requestUrl);
+      console.log("送信に成功しました");
+      this.setMessage(`送信に成功しました。文字起こし結果は ${emailAddress} に送られます。
+      結果の返信には動画時間の半分程度かかりますが、ブラウザは閉じて構いません。`);
+    } catch (error) {
+      if (error instanceof Error) {
+        if (process.env.NODE_ENV === "development") {
+          this.setMessage(`${error.message} 送信に失敗しました。
+          開発者に問い合わせてください。`);
+        }
+        if (process.env.NODE_ENV === "production") {
+          this.setMessage(`${error.message} 送信に失敗しました。R-WANの接続を確認してください。
+          開発者に問い合わせてください。`);
+        }
+      } else {
+        this.setMessage(`送信に失敗しました。`);
+      }
+    }
+  }
+
+
+  /**
+   * フォームの送信ボタンを押されたら呼ばれるメソッド
+   * @param event フォームイベント
+   */
+  private readonly handleSubmit = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
+    event.preventDefault();//ページ遷移を防ぐため
+    try {
+      this.emailAddressIsDefine(this.state.emailAddress);
+      this.videoFileIsDefine(this.state.videoFile);
+    } catch {
+      return;
+    }
+    this.showProgressBar();
+    this.setMessage("");
+
+    const audioBlob = await this.convertVideoToAudio(this.state.videoFile);
+    if (audioBlob == null) {
+      return;
+    }
+
+    await this.requestTranscription(audioBlob, this.state.emailAddress);
+
+    this.hideProgressBar();
+  }
+
+  private readonly uploadForm = (): React.ReactElement => {
     return (
       <form onSubmit={this.handleSubmit}>
         <p>
@@ -175,7 +233,8 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
       </form>
     );
   }
-  form(): React.ReactElement {
+
+  private readonly form = (): React.ReactElement => {
     return (
       <div>
         {this.state.isLoggedIn
@@ -202,16 +261,14 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
     };
     if (isGoogleLoginResponse(response)) {
       console.log(response.profileObj.email);
+      this.isLoggedIn(true);
       this.setState({
-        isLoggedIn: true,
-        emailAddress: response.profileObj.email,
-        message: "ログインしました"
+        emailAddress: response.profileObj.email
       });
+      this.setMessage("ログインしました");
     } else { //GoogleLoginResponseOfflineはOffline accessの方法でrefresh tokenを取る時のみ返す
       //基本的にはoffline accessをしないのでこちらの条件にはならない
-      this.setState({
-        message: "ログインできませんでした"
-      });
+      this.setMessage("ログインできませんでした");
     }
   }
 
@@ -220,24 +277,20 @@ class App extends React.Component<EmptyProps, convertVideoToAudioStateInterface>
    * @param error エラーメッセージ
    */
   private readonly onLoginFailure = (error: googleLoginError): void => {
-    this.setState({
-      isLoggedIn: false,
-      message: `ログインできませんでした
-              ${loginFailureMessage(error.error)}`
-    });
+    this.isLoggedIn(false);
+    this.setMessage(`ログインできませんでした
+    ${loginFailureMessage(error.error)}`);
   }
 
   /**
    * GoogleLoout成功時のコールバック関数
    */
   private readonly onLogoutSuccess = (): void => {
-    this.setState({
-      isLoggedIn: false,
-      message: "ログアウトしました"
-    });
+    this.isLoggedIn(false);
+    this.setMessage("ログアウトしました");
   }
 
-  googleButton(): ReactElement {
+  private readonly googleButton = (): ReactElement => {
     if (!this.state.isLoggedIn) {
       console.log("true");
       return (
